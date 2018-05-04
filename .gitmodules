@@ -1,0 +1,6 @@
+[submodule "kodo"]
+	path = kodo
+	url = git@github.com:qiniu-ava/alluxio-kodo.git
+[submodule "alluxio"]
+	path = alluxio
+	url = git@github.com:qiniu-ava/alluxio.git
