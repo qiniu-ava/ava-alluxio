@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alluxio-client-readonly-bowen
+spec:
+  imagePullSecrets:
+    - name: atlab-images
+  containers:
+    - name: alluxio-client-readonly-bowen
+      image: reg-xs.qiniu.io/atlab/alluxio-bowen
+      imagePullPolicy: Always
+      command: ["/entrypoint.sh"]
+      args: ["client"]
+      envFrom:
+      - configMapRef:
+          name: alluxio-worker-readonly-config
+      env:
+        - name: ALLUXIO_LOCALITY_NODE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      resources:
+        requests:
+          cpu: 2
+          memory: 20Gi 
+        limits:
+          cpu: 2
+          memory: 40Gi 
+      securityContext:
+        privileged: true
+  restartPolicy: Always
+
