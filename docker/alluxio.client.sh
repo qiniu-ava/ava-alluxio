@@ -38,7 +38,8 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=10.200.20.91:2181,10.200.20.70:2181,10.200.20.80:2181 \
     -p 29998:29998 \
     -p 39998:39998 \
-    alluxio
+    alluxio \
+    client
 }
 
 remove() {

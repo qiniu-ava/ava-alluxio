@@ -7,18 +7,30 @@ if [ "$cmd" = "" ]; then
   exit 1
 fi
 
+myip=`ifconfig | grep 'inet addr:10.' | awk -F':' '{print $2}' | awk '{print $1}'`
+
 start() {
+  ram_size=10G
+  if [ ! -d /mnt/ramdisk ]; then
+    sudo mkdir -p /mnt/ramdisk
+    sudo mount -t ramfs -o size=${ram_size} ramfs /mnt/ramdisk
+    sudo chmod a+w /mnt/ramdisk
+  fi
+
+  mkdir -p /alluxio-journal/volumes/test/${myip}/underStorage
+  mkdir -p /alluxio-journal/volumes/test/${myip}/cachedisk
+
   docker run -d \
     --name alluxio-worker \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_MASTER_PORT=19998 \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=64 \
-    -e ALLUXIO_WORKER_MEMORY_SIZE=10GB \
+    -e ALLUXIO_WORKER_MEMORY_SIZE=$ram_size \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=2 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/ramdisk \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=10GB \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=$ram_size \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.75 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.5 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
@@ -38,7 +50,11 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=10.200.20.91:2181,10.200.20.70:2181,10.200.20.80:2181 \
     -p 29998:29998 \
     -p 39998:39998 \
-    alluxio
+    -v /mnt/ramdisk:/opt/ramdisk \
+    -v /alluxio-journal/volumes/test/${myip}/underStorage:/underStorage \
+    -v /alluxio-journal/volumes/test/${myip}/cachedisk:/opt/cachedisk \
+    alluxio \
+    worker
 }
 
 remove() {
