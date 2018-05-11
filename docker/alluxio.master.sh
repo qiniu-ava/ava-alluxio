@@ -16,7 +16,8 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=10.200.20.91:2181,10.200.20.70:2181,10.200.20.80:2181 \
     -p 19998:19998 \
     -v /alluxio-journal/volumes/test/journal/:/journal \
-    alluxio
+    alluxio \
+    master --no-format
 }
 
 remove() {
