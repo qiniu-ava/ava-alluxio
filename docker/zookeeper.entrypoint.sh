@@ -1,16 +1,13 @@
 #!/bin/bash
 
-set -e
+myip=`ifconfig | grep 'inet addr:10.' | awk -F':' '{print $2}' | awk '{print $1}'`
 
-echo "hello world"
-
-my_ip=`ifconfig | grep 'inet addr:172' | awk -F':' '{print $2}' | awk '{print $1}'`
-
-echo "my_ip: $my_ip"
-my_id=`echo $my_ip | awk -F'.' '{print $4}'`
-echo "my_id: $my_id"
-export ZOO_MY_ID=$my_id
-
-# /docker-entrypoint.sh
-
-sleep 3600
+docker rm -f alluxio-zk
+docker run -d \
+  --name alluxio-zk \
+  -e ZOO_MY_ID=${myip} \
+  -e ZOO_SERVERS=10.200.20.91:2888:3888,10.200.20.70:2888:3888,10.200.20.80:2888:3888 \
+  -p 2888:2888 \
+  -p 3888:3888 \
+  -p 2181:2181 \
+  zookeeper:3.4
