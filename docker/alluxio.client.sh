@@ -33,7 +33,7 @@ start() {
     -e ALLUXIO_USER_BLOCK_SIZE_BYTES_DEFAULT=1MB \
     -e ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=8192 \
     -e ALLUXIO_SECURITY_GROUP_MAPPING_CLASS="" \
-    -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/o    khttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/    jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
+    -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
     -e ALLUXIO_ZOOKEEPER_ADDRESS=10.200.20.91:2181,10.200.20.70:2181,10.200.20.80:2181 \
     -p 29998:29998 \
@@ -46,7 +46,7 @@ remove() {
 }
 
 status() {
-  docker ps | grep alluxio-client
+  docker ps -a | grep alluxio-client
   echo "alluxio-client logs:"
   docker logs --tail 25 alluxio-client
 }
@@ -55,6 +55,7 @@ case $cmd in
   pull)
     docker pull reg-xs.qiniu.io/atlab/alluxio-bowen
     docker tag reg-xs.qiniu.io/atlab/alluxio-bowen alluxio
+  ;;
   start)
     start
   ;;
