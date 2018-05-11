@@ -67,7 +67,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: alluxio-master-readonly
-          image: reg-xs.qiniu.io/atlab/alluxio-readonly
+          image: reg-xs.qiniu.io/atlab/alluxio-bowen
           imagePullPolicy: Always
           command: ["/entrypoint.sh"]
           args: ["master", "--no-format"]
