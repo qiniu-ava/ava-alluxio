@@ -1,0 +1,103 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-master-readonly-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-master-readonly-dashboard.ava.ke-xs.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-master-readonly-dashboard
+          servicePort: 19999
+        path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alluxio-master-readonly-dashboard
+  namespace: ava
+  labels:
+    app: alluxio-master-readonly
+spec:
+  ports:
+  - port: 19999
+    name: web
+  selector:
+    app: alluxio-master-readonly
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alluxio-master-readonly
+  namespace: ava
+  labels:
+    app: alluxio-master-readonly
+spec:
+  ports:
+  - port: 19998
+    name: rpc
+  - port: 19999
+    name: web
+  clusterIP: None
+  selector:
+    app: alluxio-master-readonly
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: alluxio-master-readonly
+  namespace: ava
+spec:
+  selector:
+    matchLabels:
+      app: alluxio-master-readonly
+  serviceName: alluxio-master-readonly
+  replicas: 3
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: alluxio-master-readonly
+    spec:
+      imagePullSecrets:
+        - name: atlab-images
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: alluxio-master-readonly
+          image: reg-xs.qiniu.io/atlab/alluxio-bowen
+          imagePullPolicy: Always
+          command: ["/entrypoint.sh"]
+          args: ["master", "--no-format"]
+          env:
+            - name: ALLUXIO_MASTER_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          envFrom:
+          - configMapRef:
+              name: alluxio-master-readonly-config
+          ports:
+          - containerPort: 19998
+            name: rpc
+          - containerPort: 19999
+            name: web
+          volumeMounts:
+            - name: alluxio-master-journal
+              mountPath: /journal
+              readOnly: false
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi 
+            limits:
+              cpu: 8
+              memory: 16Gi 
+      restartPolicy: Always
+      volumes:
+        - name: alluxio-master-journal
+          persistentVolumeClaim:
+            claimName: alluxio-master-readonly-journal
+            readOnly: false
