@@ -24,6 +24,7 @@ start() {
     --name alluxio-worker \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
+    -e ALLUXIO_MASTER_HOSTNAME=$myip \
     -e ALLUXIO_MASTER_PORT=19998 \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=64 \
     -e ALLUXIO_WORKER_MEMORY_SIZE=$ram_size \
@@ -46,13 +47,11 @@ start() {
     -e ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=8192 \
     -e ALLUXIO_SECURITY_GROUP_MAPPING_CLASS="" \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
-    -e ALLUXIO_ZOOKEEPER_ENABLED=true \
-    -e ALLUXIO_ZOOKEEPER_ADDRESS=10.200.20.91:2181,10.200.20.70:2181,10.200.20.80:2181 \
     -p 29998:29998 \
     -p 39998:39998 \
     -v /mnt/ramdisk:/opt/ramdisk \
-    -v /alluxio-journal/volumes/test/${myip}/underStorage:/underStorage \
-    -v /alluxio-journal/volumes/test/${myip}/cachedisk:/opt/cachedisk \
+    -v /alluxio-journal/volumes/test/underStorage:/underStorage \
+    -v /alluxio-journal/volumes/test/cachedisk:/opt/cachedisk \
     alluxio \
     worker
 }
