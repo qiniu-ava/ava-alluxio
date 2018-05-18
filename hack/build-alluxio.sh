@@ -8,33 +8,49 @@ cd $DIR/..
 build_tarball=true
 build_kodo=true
 build_image=true
+local_alluxio=$DIR/../alluxio
+local_kodo=$DIR/../kodo
 
-if [ `echo $@ | grep '\--tarball=false' | wc -l | sed -e 's/^[[:space:]]*//'` = "1" ]; then
-  build_tarball=false
-fi
+for i in "$@"; do
+  case $i in
+    -t=*|--tarball=*)
+      build_tarball="${i#*=}"
+    ;;
+    -k=*|--kodo=*)
+      build_kodo="${i#*=}"
+    ;;
+    -i=*|--image=*)
+      build_image="${i#*=}"
+    ;;
+    --local-alluxio=*)
+      local_alluxio="${i#*=}"
+    ;;
+    --local-kodo=*)
+      local_kodo="${i#*=}"
+    ;;
+    *)
+      # unknown option
+    ;;
+  esac
+done
 
-if [ `echo $@ | grep '\--kodo=false' | wc -l | sed -e 's/^[[:space:]]*//'` = "1" ]; then
-  build_kodo=false
-fi
-
-if [ `echo $@ | grep '\--image=false' | wc -l | sed -e 's/^[[:space:]]*//'` = "1" ]; then
-  build_image=false
-fi
+mkdir -p .tmp/alluxio .tmp/kodo .tmp/temp/kodo
 
 ########################################################################### 
 # build alluxio tarball and extract
 ###########################################################################
 if [ $build_tarball != "false" ]; then
   echo "building alluxio tarball"
-  mkdir -p .tmp/alluxio .tmp/kodo .tmp/temp/kodo && \
+  rm -rf .tmp/alluxio/* .tmp/temp/kodo/* && \
     cd .tmp/alluxio && \
-    $DIR/../alluxio/dev/scripts/generate-tarballs single && \
+    ${local_alluxio}/dev/scripts/generate-tarballs single && \
     tar xf alluxio-1.7.2-SNAPSHOT.tar.gz && \
+    rm alluxio-1.7.2-SNAPSHOT.tar.gz && \
     cd .. && \
     cp alluxio/alluxio-1.7.2-SNAPSHOT/lib/alluxio-underfs-oss-1.7.2-SNAPSHOT.jar ./temp/ && \
     cd temp/kodo/ && \
-    jar xf ../alluxio-underfs-oss-1.7.2-SNAPSHOT.jar && \
-    cd $DIR/.. && \
+    jar xf ../alluxio-underfs-oss-1.7.2-SNAPSHOT.jar
+  cd $DIR/.. && \
     echo -e "\n\n\n"
 else
   echo -e "skip building alluxio tarball\n\n\n"
@@ -45,9 +61,9 @@ fi
 ###########################################################################
 if [ $build_kodo != "false" ]; then
   echo "building alluxio kodo sdk"
-  cd kodo
+  cd ${local_kodo}
   mvn -DskipTests -Dlicense.skip=true compile install
-  rm -rf $DIR/../.tmp/temp/kodo/com && cp -r target/classes/com ../.tmp/temp/kodo/com
+  rm -rf $DIR/../.tmp/temp/kodo/com && cp -r target/classes/com $DIR/../.tmp/temp/kodo/com
   cd $DIR/../.tmp/temp/kodo && \
     rm -f alluxio-underfs-oss-1.7.2-SNAPSHOT.jar && \
     jar -cf alluxio-underfs-oss-1.7.2-SNAPSHOT.jar . && \
@@ -65,9 +81,10 @@ fi
 ###########################################################################
 if [ $build_image != "false" ]; then
   echo "building docker image"
-  docker build -t alluxio -f ./docker/Dockerfile.alluxio .tmp/alluxio/alluxio-1.7.2-SNAPSHOT && \
-    echo -e "\n\n\n"
+  cp ./docker/entrypoint.sh .tmp/alluxio/
+  ls .tmp/alluxio
+  docker build -t alluxio -f ./docker/Dockerfile.alluxio .tmp/alluxio
+  echo -e "\n\n\n"
 else
   echo -e "skip building docker image\n\n\n"
 fi
-

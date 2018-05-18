@@ -36,7 +36,6 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 # qrsctl
 # ---------------------------------------------------------------
 
-COPY .qiniurc /root/
 RUN mkdir -p /root/bin && \
 	curl http://atlab.ava-test.xbowen.com/tmp/tools/qrsctl -o /root/bin/qrsctl && \
 	chmod +x /root/bin/qrsctl
@@ -55,13 +54,7 @@ ENV LC_ALL=C.UTF-8
 # add alluxio package
 # ---------------------------------------------------------------
 
-ADD alluxio /opt/alluxio
-ADD lib /opt/alluxio/lib
-ADD train.txt /root/
-ADD assembly /opt/alluxio/assembly
-
-RUN mkdir -p /home
-COPY .tools.sh /home/
-ENV TERM=xterm
+ADD alluxio-1.7.2-SNAPSHOT /opt/alluxio
 COPY entrypoint.sh /
+ENV TERM=xterm
 ENTRYPOINT ["/entrypoint.sh"]
