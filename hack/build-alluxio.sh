@@ -1,5 +1,20 @@
 #!/bin/bash
 
+###########################################################################
+################################# Usage ###################################
+## options:                                                              ##
+##   -t/--tarball=true/false, whether to build alluxio tarball           ##
+##      optional, default: true                                          ##
+##   -k/--kodo=true/false whether to build kodo jar package              ##
+##      optional, default: true                                          ##
+##   -i/--image=true/false whether to build docker image                 ##
+##      optional, default: true                                          ##
+##   --local-alluxio=<absolute_path_to_your_alluxio_repostory>           ##
+##      optional, default: alluxio submodule path                        ##
+##   --local-kodo=<absolute_path_to_your_kodo_repostory>                 ##
+##      optional, default: kodo submodule path                           ##
+###########################################################################
+
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
