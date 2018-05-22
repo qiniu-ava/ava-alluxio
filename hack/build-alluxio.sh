@@ -97,7 +97,6 @@ fi
 if [ $build_image != "false" ]; then
   echo "building docker image"
   cp ./docker/entrypoint.sh .tmp/alluxio/
-  ls .tmp/alluxio
   docker build -t alluxio -f ./docker/Dockerfile.alluxio .tmp/alluxio
   echo -e "\n\n\n"
 else
