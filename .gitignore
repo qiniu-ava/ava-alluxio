@@ -22,3 +22,7 @@
 build/*
 .tmp
 
+
+tools/golang/bin
+tools/golang/pkg
+
