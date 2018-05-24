@@ -25,7 +25,11 @@ sudo apt-get install -y ansible
 # install docker
 # ---------------------------------------------------------------
 
-sudo cp ${DIR}/daemon.json /etc/docker/daemon.json
+# remove bad route if it exist
+if ip route list | grep -q "172.16.0.0/12 via 192.168.212.254 dev bond0"; then
+  ip route del 172.16.0.0/12 via 192.168.212.254
+fi
+
 sudo apt-get install -y apt-transport-https
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
@@ -36,8 +40,11 @@ sudo apt-get install -y docker-ce
 # docker settings
 # ---------------------------------------------------------------
 
-sudo groupadd docker
+if ! grep -q docker /etc/group; then
+  sudo groupadd docker
+fi
 sudo usermod -aG docker $USER
+mkdir -p /home/"$USER"/.docker
 sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
 sudo chmod g+rwx "/home/$USER/.docker" -R
 
