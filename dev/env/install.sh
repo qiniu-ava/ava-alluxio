@@ -2,32 +2,35 @@
 
 set -ex
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 DATA_DISK=/disk1
 
 # ===============================================================
 # install git
 # ---------------------------------------------------------------
 apt-get update
-apt-get install git ca-certificates curl
+apt-get install -y git ca-certificates curl
 
 # ===============================================================
 # install ansible
 # ---------------------------------------------------------------
 
-sudo apt-get install software-properties-common
+sudo apt-get install -y software-properties-common
 sudo apt-add-repository ppa:ansible/ansible
 sudo apt update
-sudo apt-get install ansible
+sudo apt-get install -y ansible
 
 # ===============================================================
 # install docker
 # ---------------------------------------------------------------
 
-sudo apt-get install apt-transport-https
+sudo cp ${DIR}/daemon.json /etc/docker/daemon.json
+sudo apt-get install -y apt-transport-https
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get update
-sudo apt-get install docker-ce
+sudo apt-get install -y docker-ce
 
 # ===============================================================
 # docker settings
