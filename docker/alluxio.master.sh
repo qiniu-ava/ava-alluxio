@@ -8,14 +8,19 @@ if [ "$cmd" = "" ]; then
 fi
 
 start() {
-  myip=`ifconfig | grep 'inet addr:10.' | awk -F':' '{print $2}' | awk '{print $1}'`
+  myip=`ifconfig | grep 'inet addr:192.168.212' | awk -F':' '{print $2}' | awk '{print $1}'`
   docker run -d \
     --name alluxio-master \
+    --hostname $myip \
     -e ALLUXIO_MASTER_HOSTNAME=$myip \
     -e ALLUXIO_MASTER_JOURNAL_FOLDER=/journal \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
+    -e ALLUXIO_ZOOKEEPER_ENABLED=true \
+    -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
+    -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
+    -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
     -p 19998:19998 \
-    -v /alluxio-journal/volumes/test/journal/:/journal \
+    -v /alluxio-share/alluxio/journal/:/journal \
     alluxio \
     master --no-format
 }
