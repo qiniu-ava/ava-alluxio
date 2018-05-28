@@ -10,3 +10,5 @@
 ## 本地开发
 
 ## 部署
+
+目前 alluxio 服务部署在 jq 机房 jq13-17 和 jq19-21 这几台机器。 alluxio 的 web dashboard 通过 jq-ava 中的 kubernetes 转发以提供外网服务。
