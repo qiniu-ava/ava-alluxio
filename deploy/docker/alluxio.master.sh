@@ -20,6 +20,7 @@ start() {
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
     -p 19998:19998 \
+    -p 19999:19999 \
     -v /alluxio-share/alluxio/journal/:/journal \
     alluxio \
     master --no-format

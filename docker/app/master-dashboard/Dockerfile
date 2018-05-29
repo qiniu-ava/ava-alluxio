@@ -1,0 +1,9 @@
+FROM ubuntu:16.04
+
+RUN sed -i s/archive.ubuntu.com/mirrors.163.com/g /etc/apt/sources.list && \
+    sed -i s/security.ubuntu.com/mirrors.163.com/g /etc/apt/sources.list
+
+RUN apt update && apt install -y curl nginx
+COPY ./conf /etc/nginx
+
+CMD ["sleep", "infinity"]
