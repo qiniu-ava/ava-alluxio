@@ -13,7 +13,7 @@ hint:
 	@echo TODO && exit 1
 
 build:
-	./hack/build-alluxio.sh
+	./tools/scripts/build-alluxio.sh
 
 reborn:
 	./docker/alluxio.master.sh restart
