@@ -1,6 +1,6 @@
 # ava-alluxio
 
-此代码库主要是 ava 组提供的 alluxio 服务的本地开发和部署脚本等代码。
+此代码库主要包含 ava 组提供的 alluxio 服务的本地开发和部署脚本等代码。
 
 ## 前置文档
 
@@ -13,23 +13,24 @@
 
 ## 部署
 
-目前 alluxio 服务部署在 jq 机房 jq13~17 和 jq19~21 这几台机器，以下约定这几台机器为 `alluxio 机器组`。 alluxio 的 web dashboard 通过 jq-ava 中的 kubernetes 转发以提供外网服务。
+目前 alluxio 服务部署在 jq 机房 jq13 ~ 17 和 jq19 ~ 21 这几台机器，以下约定这几台机器为 `alluxio 机器组`。 alluxio 的 web dashboard 通过 jq-ava 中的 kubernetes 转发以提供外网服务。
 
-*部署前，请先确保你已经申请了 jq13~17 和 jq19~21 的 root 权限。*
+**部署前，请先确保你已经申请了 `alluxio 机器组` 的 root 权限。*
 
-### 部署前置条件
+### 前置条件
 
 请先确保在部署的机器上已经安装了 git，并将本代码库 clone 到目标机器。
-1. 执行如下命令以安装 git。
+1. 使用 root 账号登录服务器
+2. 执行如下命令以安装 git。
 ```shell
 apt update && apt install git
 ```
-2. 克隆本代码库到本机指定位置，请注意克隆前需要将本机的公钥添加到 deploy key 中。
+3. 克隆本代码库到本机指定位置，请注意克隆前需要将本机的公钥添加到 deploy key 中。
 ```shell
 mkdir -p /disk1/repos/
 git clone git@github.com:qiniu-ava/ava-alluxio.git /disk1/repos/ava-alluxio
 ```
-3. 执行本代码库中 `deploy/env/install.sh` 脚本安装其他必要的依赖并做设置。
+4. 执行本代码库中 `deploy/env/install.sh` 脚本安装其他必要的依赖并做设置。
 
 
 ### 部署 zookeeper
@@ -73,10 +74,10 @@ git pull
 ```shell
 ./tools/scripts/build-alluxio.sh
 cd .tmp/alluxio
-hash=`git rev-parse HEAD` && tar zcvf alluxio-1.7.2-${hash:0:7}.tar.gz ./alluxio-1.7.2-SNAPSHOT
+hash=`git rev-parse --short=7 HEAD` && tar zcvf alluxio-1.7.2-${hash}.tar.gz ./alluxio-1.7.2-SNAPSHOT
 ```
 
-如需要使用本地尚未合并到 [allxio](github.com/qiniu-ava/alluxio) 中的代码，则可以在执行 build-alluxio.sh 脚本是指定 --local-alluxio 参数，如
+如需要使用本地尚未合并到 [allxio](github.com/qiniu-ava/alluxio) 中的代码，则可以在执行 build-alluxio.sh 脚本时指定 --local-alluxio 参数，如
 ```shell
 ./tools/scrips/build-alluxio.sh --local-alluxio=$HOME/qbox/alluxio
 ```
@@ -121,3 +122,8 @@ make tools-golang
 make tools-golang-deploy
 ```
 发布后可以在 `http://devtools.dl.atlab.ai/ava/cli/avio` 下载，或者 `http://devtools.dl.atlab.ai/ava/cli/avio/<version>/avio-linux` 下载验证
+
+
+## 帮助
+
+关于 alluxio 部署过程中的一些注意问题，请查看文档 [Q&A](https://github.com/qiniu-ava/ava-alluxio/blob/develop/questions.md)。
