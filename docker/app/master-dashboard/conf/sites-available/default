@@ -43,7 +43,7 @@ server {
 	location / {
 		# First attempt to serve request as file, then
 		# as directory, then fall back to displaying a 404.
-		proxy_pass 192.168.212.42:19999
+		proxy_pass http://dashboard;
 	}
 
 	# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000

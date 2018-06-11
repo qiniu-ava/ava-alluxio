@@ -5,5 +5,7 @@ RUN sed -i s/archive.ubuntu.com/mirrors.163.com/g /etc/apt/sources.list && \
 
 RUN apt update && apt install -y curl nginx
 COPY ./conf /etc/nginx
+COPY ./entrypoint.sh /entrypoint.sh
 
-CMD ["sleep", "infinity"]
+ENTRYPOINT /entrypoint.sh
+
