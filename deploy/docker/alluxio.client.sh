@@ -10,6 +10,7 @@ fi
 start() {
   docker run -d \
     --name alluxio-client \
+    --privileged=true \
     -e ALLUXIO_FUSE_CACHED_PATHS_MAX=5000 \
     -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=256 \
     -e ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS=256 \
