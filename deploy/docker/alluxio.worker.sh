@@ -7,11 +7,11 @@ if [ "$cmd" = "" ]; then
   exit 1
 fi
 
-myip=`ifconfig | grep 'inet addr:192.168.212' | awk -F':' '{print $2}' | awk '{print $1}'`
+myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
   ram_size=180G
-  ram_tier_size=160G
+  ram_tier_size=170G
   if [ ! -d /mnt/ramdisk ]; then
     sudo mkdir -p /mnt/ramdisk
     sudo mount -t ramfs -o size=${ram_size} ramfs /mnt/ramdisk
@@ -29,6 +29,7 @@ start() {
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
+    -e KODO_ORIGHOST=http://nbjjh-gate-io.qiniu.com \
     -e ALLUXIO_WORKER_MEMORY_SIZE=$ram_size \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=3 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
@@ -62,7 +63,7 @@ start() {
     -v /mnt/ramdisk:/opt/ramdisk \
     -v /disk1/alluxio/data/cachedisk:/opt/cachedisk1 \
     -v /disk2/alluxio/data/cachedisk:/opt/cachedisk2 \
-    -v /disk2/alluxio/data/underStorage:/underStorage \
+    -v /alluxio-share/alluxio/underStorage:/underStorage \
     alluxio \
     worker
 }

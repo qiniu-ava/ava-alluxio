@@ -12,6 +12,7 @@ start() {
   docker run -d \
     --name alluxio-master \
     --hostname $myip \
+    -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_MASTER_HOSTNAME=$myip \
     -e ALLUXIO_MASTER_JOURNAL_FOLDER=/journal \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
@@ -22,6 +23,7 @@ start() {
     -p 19998:19998 \
     -p 19999:19999 \
     -v /alluxio-share/alluxio/journal/:/journal \
+    -v /alluxio-share/alluxio/underStorage/:/underStorage \
     alluxio \
     master --no-format
 }
