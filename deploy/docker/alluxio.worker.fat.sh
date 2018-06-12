@@ -10,8 +10,8 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  ram_size=180G
-  ram_tier_size=170G
+  ram_size=50G
+  ram_tier_size=40G
   if [ ! -d /mnt/ramdisk ]; then
     sudo mkdir -p /mnt/ramdisk
     sudo mount -t ramfs -o size=${ram_size} ramfs /mnt/ramdisk
@@ -73,7 +73,7 @@ start() {
     -v /disk9/alluxio/data/cachedisk:/opt/cachedisk9 \
     -v /alluxio-share/alluxio/underStorage:/underStorage \
     alluxio \
-    worker
+    worker --no-format
 }
 
 remove() {
