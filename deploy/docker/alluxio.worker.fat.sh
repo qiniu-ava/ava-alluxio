@@ -19,8 +19,9 @@ start() {
     mkdir -p /mnt/ramdisk/data
   fi
 
-  mkdir -p /disk1/alluxio/data/cachedisk
-  mkdir -p /disk2/alluxio/data/cachedisk
+  for i in $(seq 1 9);do
+    mkdir -p /disk${i}/alluxio/data/cachedisk
+  done
   mkdir -p /disk2/alluxio/data/underStorage
 
   docker run -d \
@@ -38,10 +39,15 @@ start() {
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.75 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.5 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk1,/opt/cachedisk2 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=300GB,400GB \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk7,/opt/cachedisk8,/opt/cachedisk9 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=700GB,700GB,250GB \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.9 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.7 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL2_ALIAS=HDD \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL2_DIRS_PATH=/opt/cachedisk1,/opt/cachedisk2,/opt/cachedisk3,/opt/cachedisk4,/opt/cachedisk5,/opt/cachedisk6 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL2_DIRS_QUOTA=3000GB,3500GB,3500GB,3500GB,3500GB,3500GB \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL2_WATERMARK_HIGH_RATIO=0.9 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL2_WATERMARK_LOW_RATIO=0.7 \
     -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=2048 \
     -e ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS=2048 \
     -e ALLUXIO_USER_FILE_MASTER_CLIENT_THREADS=1024 \
@@ -58,6 +64,13 @@ start() {
     -v /mnt/ramdisk:/opt/ramdisk \
     -v /disk1/alluxio/data/cachedisk:/opt/cachedisk1 \
     -v /disk2/alluxio/data/cachedisk:/opt/cachedisk2 \
+    -v /disk3/alluxio/data/cachedisk:/opt/cachedisk3 \
+    -v /disk4/alluxio/data/cachedisk:/opt/cachedisk4 \
+    -v /disk5/alluxio/data/cachedisk:/opt/cachedisk5 \
+    -v /disk6/alluxio/data/cachedisk:/opt/cachedisk6 \
+    -v /disk7/alluxio/data/cachedisk:/opt/cachedisk7 \
+    -v /disk8/alluxio/data/cachedisk:/opt/cachedisk8 \
+    -v /disk9/alluxio/data/cachedisk:/opt/cachedisk9 \
     -v /alluxio-share/alluxio/underStorage:/underStorage \
     alluxio \
     worker
