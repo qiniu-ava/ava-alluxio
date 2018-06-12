@@ -60,7 +60,7 @@ start() {
     -v /disk2/alluxio/data/cachedisk:/opt/cachedisk2 \
     -v /alluxio-share/alluxio/underStorage:/underStorage \
     alluxio \
-    worker
+    worker --no-format
 }
 
 remove() {
