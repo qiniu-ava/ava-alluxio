@@ -80,8 +80,8 @@ status() {
 
 case $cmd in
   pull)
-    docker pull reg-xs.qiniu.io/atlab/alluxio-bowen
-    docker tag reg-xs.qiniu.io/atlab/alluxio-bowen alluxio
+    docker pull reg-xs.qiniu.io/atlab/alluxio
+    docker tag reg-xs.qiniu.io/atlab/alluxio alluxio
   ;;
   start)
     start

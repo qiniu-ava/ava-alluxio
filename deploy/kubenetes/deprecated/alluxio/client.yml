@@ -7,7 +7,7 @@ spec:
     - name: atlab-images
   containers:
     - name: alluxio-client-readonly-bowen
-      image: reg-xs.qiniu.io/atlab/alluxio-bowen
+      image: reg-xs.qiniu.io/atlab/alluxio
       imagePullPolicy: Always
       command: ["/entrypoint.sh"]
       args: ["client"]
