@@ -77,7 +77,7 @@ cd .tmp/alluxio
 hash=`git rev-parse --short=7 HEAD` && tar zcvf alluxio-1.7.2-${hash}.tar.gz ./alluxio-1.7.2-SNAPSHOT
 ```
 
-如需要使用本地尚未合并到 [allxio](github.com/qiniu-ava/alluxio) 中的代码，则可以在执行 build-alluxio.sh 脚本时指定 --local-alluxio 参数，如
+如需要使用本地尚未合并到 [alluxio](github.com/qiniu-ava/alluxio) 中的代码，则可以在执行 build-alluxio.sh 脚本时指定 --local-alluxio 参数，如
 ```shell
 ./tools/scrips/build-alluxio.sh --local-alluxio=$HOME/qbox/alluxio
 ```

@@ -53,7 +53,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: alluxio-worker-readonly
-          image: reg-xs.qiniu.io/atlab/alluxio-bowen
+          image: reg-xs.qiniu.io/atlab/alluxio
           imagePullPolicy: Always
           command: ["/entrypoint.sh"]
           args: ["worker"]
