@@ -190,7 +190,7 @@ func (c *CMD) worker() {
 
 	if e != nil {
 		msg.ok = false
-		msg.message = "read file failed"
+		msg.message = fmt.Sprintf("read file failed, read fail message: %v", e)
 	} else {
 		msg.ok = true
 		msg.message = ""
