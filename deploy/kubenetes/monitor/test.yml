@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-master-readonly-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-readonly-dashboard.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-readonly-dashboard
+          servicePort: 80
+        path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alluxio-readonly-dashboard
+  namespace: ava
+  labels:
+    app: alluxio-readonly-dashboard
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: alluxio-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alluxio-dashboard
+  labels:
+    app: alluxio-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alluxio-nginx
+  template:
+    metadata:
+      labels:
+        app: alluxio-nginx
+    spec:
+      hostNetwork: true
+      imagePullSecrets:
+        - name: atlab-images
+      containers:
+      - name: nginx
+        image: reg-xs.qiniu.io/atlab/alluxio-nginx:test
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 0.1
+            memory: 512Mi 
+          limits:
+            cpu: 0.5
+            memory: 2Gi 
