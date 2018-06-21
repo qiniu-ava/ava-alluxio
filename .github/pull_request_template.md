@@ -1,8 +1,6 @@
-## [ATLAB-1886] workloads (复制 JIRA 链接)
-
 ### issues
 
-* 相关 issue: https://jira.qiniu.io/browse/ATLAB-2
+* [ATLAB-1886](https://jira.qiniu.io/browse/ATLAB-1886)
 
 
 ### TODOs
