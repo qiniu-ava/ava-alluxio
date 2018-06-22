@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 cmd=$1
 
 if [ "$cmd" = "" ]; then
@@ -37,8 +39,14 @@ status() {
 
 case $cmd in
   pull)
-    docker pull reg-xs.qiniu.io/atlab/alluxio
-    docker tag reg-xs.qiniu.io/atlab/alluxio alluxio
+    tag=$2
+    if [ $tag = "" ];then
+      cd $DIR/../../alluxio && alluxio_hash=`git rev-parse --short=7 HEAD` && cd -
+      cd $DIR/../../kodo && kodo_hash=`git rev-parse --short=7 HEAD` && cd -
+      tag=$alluxio_hash-$kodo_hash
+    fi
+    docker pull reg-xs.qiniu.io/atlab/alluxio:$tag
+    docker tag reg-xs.qiniu.io/atlab/alluxio:$tag alluxio
   ;;
   start)
     start
