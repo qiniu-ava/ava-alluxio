@@ -100,7 +100,11 @@ cd $DIR/../..
 if [ $build_image != "false" ]; then
   echo "building docker image"
   cp $DIR/docker-image/entrypoint.sh .tmp/alluxio/
-  docker build -t alluxio -f $DIR/docker-image/Dockerfile.alluxio .tmp/alluxio
+  cd $local_alluxio && alluxio_hash=`git rev-parse --short=7 HEAD` && cd -
+  cd $local_kodo && kodo_hash=`git rev-parse --short=7 HEAD` && cd -
+  docker build -t alluxio:$alluxio_hash-$kodo_hash -f $DIR/docker-image/Dockerfile.alluxio .tmp/alluxio
+  docker tag alluxio:$alluxio_hash-$kodo_hash reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
+  docker push reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
   echo -e "\n\n\n"
 else
   echo -e "skip building docker image\n\n\n"
