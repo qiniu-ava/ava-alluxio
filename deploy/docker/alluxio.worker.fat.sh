@@ -92,7 +92,7 @@ status() {
 case $cmd in
   pull)
     tag=$2
-    if [ $tag = "" ];then
+    if [ "$tag" = "" ];then
       cd $DIR/../../alluxio && alluxio_hash=`git rev-parse --short=7 HEAD` && cd -
       cd $DIR/../../kodo && kodo_hash=`git rev-parse --short=7 HEAD` && cd -
       tag=$alluxio_hash-$kodo_hash
