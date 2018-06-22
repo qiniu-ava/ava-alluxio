@@ -26,13 +26,16 @@ start() {
   done
   mkdir -p /disk2/alluxio/data/underStorage
 
+  source /alluxio-share/alluxio/env/worker
+
   docker run -d \
     --name alluxio-worker \
     --hostname ${myip} \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
-    -e KODO_ORIGHOST=http://nbjjh-gate-io.qiniu.com \
+    -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
+    -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
     -e ALLUXIO_WORKER_MEMORY_SIZE=$ram_size \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=3 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
