@@ -13,6 +13,21 @@ spec:
           servicePort: 80
         path: /
 ---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-master-test-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-test-dashboard.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-readonly-dashboard
+          servicePort: 80
+        path: /
+---
 apiVersion: v1
 kind: Service
 metadata:
