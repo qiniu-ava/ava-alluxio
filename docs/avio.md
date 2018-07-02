@@ -26,6 +26,7 @@ avio <cmd> [options] [options]...
 | help | 查看帮助文档 | WIP |
 | preload | 将指定目录或者文件预加载到 alluxio 中，便于之后快速读取 | WIP |
 | ls | 列出指定目录或者文件的信息 | WIP |
+| stat | 查看指定目录或者文件在 alluxio 系统中的状况，比如是否已经加载缓存中，若已经加载进来位于哪一层级 | WIP |
 | mv | 将指定目录或者文件移动到/出 alluxio 中 | WIP |
 | cp | 将指定目录或者文件复制到/出 alluxio 中 | WIP |
 | rm | 删除指定目录或者文件 | WIP |
@@ -44,6 +45,24 @@ avio preload [options] [path]
     + path 和 -i/--input-file 参数是互斥的，若两者都没有设置则将会 preload 当前目录
 
 **在任务启动之前会尝试查看找到的第一个文件所在的文件系统的 mountpoint，若发现此 mountpoint 不是 alluxio-fuse 类型的文件系统，将退出程序(且退出码非 0 )。*
+
+### ls
+avio ls [options] [path]
+  + options
+    + -f --full 当指定的路径下文件或子目录数量超过5000时，是否全量拉取，默认值为 false
+    + -h 以易读的方式显示文件大小
+    + -r 递归的列出目录下子目录中的文件
+    + -c 只显示目录下的文件或子目录数
+
+### stat
+
+avio stat [options] [path]
+  + options:
+    + -d --depth 递归深度，默认值为递归到 4，最大值为 10
+    + -t --show-tier 显示在缓存中的层级
+    + --report 生成统计数据到指定文件，默认为 $HOME/.avio/report/stat_<start_unix_timestamp>.log
+  + path:
+    + 要统计的目录或者文件
 
 ### mv
 avio mv [options] <source> <target>  
