@@ -16,8 +16,8 @@ func init() {
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of Hugo",
-	Long:  `All software has versions. This is Hugo's`,
+	Short: "输出 avio 命令行工具的版本号",
+	Long:  "输出 avio 命令行工具的版本号",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(VERSION)
 	},

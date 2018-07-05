@@ -9,10 +9,9 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "avio",
-	Short: "avio is the io tools for ava",
-	Long: `A Fast and Flexible Static Site Generator built with
-                love by spf13 and friends in Go.
-                Complete documentation is available at http://hugo.spf13.com`,
+	Short: "avio 是为 ava 用户开发的，便于使用 alluxio 缓存系统的管理工具",
+	Long: `avio 帮助 ava 用户更方便的使用 alluxio 缓存系统，提高预取数据、
+								同步数据、查看数据状态等操作的速度和便利性。`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
 	},

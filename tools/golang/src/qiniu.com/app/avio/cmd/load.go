@@ -3,7 +3,6 @@ package cmd
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/cobra"
 	util "qiniu.com/app/avio/util"
 )
 
@@ -38,6 +38,8 @@ type CMD struct {
 	prefix          string
 	isJSONList      bool
 	pool            uint
+	path            string
+	log             string
 	scannerFinished bool
 	readWg          sync.WaitGroup
 	readCh          chan string
@@ -47,28 +49,21 @@ type CMD struct {
 	metricsMu       sync.Mutex
 }
 
-func (c *CMD) init() {
-	flag.StringVar(&c.input, "input", "", "input file list")
-	flag.StringVar(&c.prefix, "prefix", "/", "local path prefix, default is root")
-	flag.UintVar(&c.pool, "pool", 20, "concurrent fetch pool size, default 20")
-	flag.BoolVar(&c.isJSONList, "is-jsonlist", false, "each line should be a json string if this is set true, default false")
+func (c *CMD) init(flags *loadFlags) {
+	c.input = flags.Source
+	c.prefix = ""
+	c.pool = flags.PoolSize
 
-	vFlag := flag.Bool("V", false, "version")
-	hFlag := flag.Bool("h", false, "help")
+	c.isJSONList = false
+	if flags.IsJSONList == "true" {
+		c.isJSONList = true
+	}
 
-	flag.Parse()
-	if *vFlag {
-		fmt.Println(VERSION)
-		os.Exit(0)
+	c.path = ""
+	if len(flags.Args) == 1 {
+		c.path = flags.Args[0]
 	}
-	if *hFlag {
-		flag.Usage()
-		os.Exit(0)
-	}
-	if c.input == "" {
-		flag.Usage()
-		os.Exit(1)
-	}
+
 	c.metrics = &WorkerMetrics{
 		jobs:           0,
 		doneJobs:       0,
@@ -237,4 +232,109 @@ func (c *CMD) scannerAdjust() {
 			break
 		}
 	}
+}
+
+type loadFlags struct {
+	Source     string
+	IsJSONList string
+	LogPath    string
+	PoolSize   uint
+	Depth      uint
+	Args       []string
+}
+
+func (f *loadFlags) Validate() error {
+	if f.PoolSize > 100 || f.PoolSize < 1 {
+		return &util.AvioError{
+			Msg: "请设置合法的参数，poolSize 参数最大值为 100，最小值为 1",
+		}
+	}
+
+	if f.Depth > 10 || f.Depth < 1 {
+		return &util.AvioError{
+			Msg: "请设置合法的参数，depth 参数最大值为 10，最小值为 1",
+		}
+	}
+
+	if len(f.Args) > 1 {
+		return &util.AvioError{
+			Msg: "当前只支持一次加载一个指定目录或者文件，一次加载多个目录或者文件的功能将在后续支持",
+		}
+	}
+
+	if len(f.Args) == 1 && f.Source != "" {
+		return &util.AvioError{
+			Msg: "-i/--input-file 参数和 path 只能同时设置一个",
+		}
+	}
+
+	if f.IsJSONList != "false" && f.IsJSONList != "true" {
+		return &util.AvioError{
+			Msg: "--is-jsonlist 参数的可选项为 false/true",
+		}
+	}
+
+	if f.IsJSONList == "true" && f.Source != "" {
+		return &util.AvioError{
+			Msg: "--is-jsonlist 参数只有在指定了 -i/--input-file 参数时有效",
+		}
+	}
+
+	if f.Source != "" && f.Depth != 4 {
+		fmt.Printf("[WARN] -d/--depth 被设置为 %d，在使用 avio preload -i/--input-file=<list_file> 的模式下将被忽略", f.Depth)
+	}
+	return nil
+}
+
+var mLoadFlags = &loadFlags{}
+
+func init() {
+	preloadCmd.Flags().UintVarP(&mLoadFlags.Depth, "depth", "d", 4, "递归加载的最大深度，默认值为 4，最大值为 10")
+	preloadCmd.Flags().StringVarP(&mLoadFlags.Source, "input-source", "i", "", "所有需要 preload 的文件的列表文件")
+	preloadCmd.Flags().StringVar(&mLoadFlags.IsJSONList, "is-jsonlist", "false", "只在 -i/--input-file 被设置时有效，可选项：true/false，默认值为 false")
+	preloadCmd.Flags().UintVarP(&mLoadFlags.PoolSize, "pool", "p", 50, "并行 preload 的并发数，默认值为 50，最大值为 200")
+	preloadCmd.Flags().StringVarP(&mLoadFlags.LogPath, "log", "l", "/var/log/avio/preload-<unix_time>.log", "当前任务的日志文件，默认值为 /var/log/avio/preload-<unix_time>.log")
+	preloadCmd.SetUsageTemplate(`Usage:{{if .Runnable}}
+  {{.UseLine}} [path] {{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`)
+	rootCmd.AddCommand(preloadCmd)
+}
+
+var preloadAliases = []string{"ld", "pl", "load"}
+var preloadCmd = &cobra.Command{
+	Use:                "preload",
+	Short:              "将指定目录或文件加载到 alluxio 缓存系统中",
+	Long:               `将指定目录或文件加载到 alluxio 缓存系统中，此操作可能导致其他最近未使用的数据被踢出 alluxio 缓存系统或从缓存系统中更高级别的缓存降级到更低级别的缓存中。`,
+	Aliases:            preloadAliases,
+	DisableSuggestions: false,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		mLoadFlags.Args = args
+		return mLoadFlags.Validate()
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		mCMD := &CMD{}
+		mCMD.init(mLoadFlags)
+		mCMD.start()
+	},
 }
