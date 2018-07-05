@@ -108,12 +108,10 @@ if [ $build_image != "false" ]; then
   cp $DIR/docker-image/entrypoint.sh .tmp/alluxio/
   cd $local_alluxio && alluxio_hash=`git rev-parse --short=7 HEAD` && cd -
   cd $local_kodo && kodo_hash=`git rev-parse --short=7 HEAD` && cd -
+  docker build -t alluxio:$alluxio_hash-$kodo_hash -f $DIR/docker-image/Dockerfile.alluxio .tmp/alluxio
   if [ $push_image != "false" ]; then
-    docker build -t alluxio:$alluxio_hash-$kodo_hash -f $DIR/docker-image/Dockerfile.alluxio .tmp/alluxio
     docker tag alluxio:$alluxio_hash-$kodo_hash reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
     docker push reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
-  else
-    docker build -t alluxio:$alluxio_hash-$kodo_hash -f $DIR/docker-image/Dockerfile.alluxio .tmp/alluxio
   fi
   echo -e "\n\n\n"
 else

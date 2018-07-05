@@ -4,16 +4,18 @@
 ################################# Usage ####################
 ## options:                                               ##
 ##   --ak=string, pandora account AK                      ##
-##      optional, default: currentPath account AK         ##
+##      optional, default: null                           ##
 ##   --sk=string, pandora account SK                      ##
-##      optional, default: currentPath account SK         ##
-##   --aksk=string, pandora account absolute path         ##
-##      optional, default: currentPath/account            ##
+##      optional, default: null                           ##
+##   --aksk=string, pandora aksk absolute path            ##
+##      optional, default: null                           ##
+##   --mail=string, default:ava-dev                       ##
+##      optional, mail with pandora service               ##
 ############################################################
 ##account file should contain:                            ##
 ##                                                        ##
-##  AK=XXXXXXXXXXX                                        ##
-##  SK=XXXXXXXXXXX                                        ##
+##  mail_AK=XXXXXXXXXXX                                   ##
+##  mail_SK=XXXXXXXXXXX                                   ##
 ##                                                        ##
 ############################################################
 
@@ -22,8 +24,9 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
-AK="$(sed -n 's/AK=//gp' $DIR/account)"
-SK="$(sed -n 's/SK=//gp' $DIR/account)"
+AK=""
+SK=""
+service_mail="ava-dev"
 
 for i in "$@"; do
   case $i in
@@ -33,10 +36,13 @@ for i in "$@"; do
     --sk=*)
       SK="${i#*=}"
     ;;
-    --AKSK=*)
+    --mail=*)
+      service_mail="${i#*=}"
+    ;;
+    --aksk=*)
 	  akskFile="${i#*=}"
-      AK="$(sed -n 's/AK=//gp' $akskFile)"
-      SK="$(sed -n 's/SK=//gp' $akskFile)"
+      AK="$(sed -n 's/'$service_mail'_AK=//gp' $akskFile)"
+      SK="$(sed -n 's/'$service_mail'_SK=//gp' $akskFile)"
     ;;
     *)
       # unknown option
@@ -47,10 +53,10 @@ done
 if [ "$AK" != "" -a "$SK" != "" ]; then
   for file in $DIR/confs/* ; do  
     temp_file=`basename $file`
-    sed -i "" 's/\"pandora_ak\": <pandora_ak>/\"pandora_ak\": '$AK'/' $DIR/confs/$temp_file
-    sed -i "" 's/\"pandora_sk\": <pandora_sk>/\"pandora_ak\": '$SK'/' $DIR/confs/$temp_file
+    sed -i 's/\"pandora_ak\": <pandora_ak>/\"pandora_ak\": '$AK'/' $DIR/confs/$temp_file
+    sed -i 's/\"pandora_sk\": <pandora_sk>/\"pandora_sk\": '$SK'/' $DIR/confs/$temp_file
   done
-  ./logkit -f logkit.conf
+  nohup ./logkit -f logkit.conf > ../logkit.out 2>&1 &
 else
   echo "please check your AKSK or account path"
 fi
