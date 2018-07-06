@@ -51,13 +51,18 @@ for i in "$@"; do
 done
 
 if [ "$AK" != "" -a "$SK" != "" ]; then
-  for file in $DIR/confs/* ; do  
+  for file in $DIR/confs/* ; do
     temp_file=`basename $file`
     sed -i 's/\"pandora_ak\": <pandora_ak>/\"pandora_ak\": '$AK'/' $DIR/confs/$temp_file
     sed -i 's/\"pandora_sk\": <pandora_sk>/\"pandora_sk\": '$SK'/' $DIR/confs/$temp_file
   done
+  logkitPID="$(ps -aux | grep "logkit" | grep -v grep | awk '{print $2}')"
+  if [ "$logkitPID" != "" ]; then
+    for i in $logkitPID; do
+      kill -9 $logkitPID
+    done
+  fi
   nohup ./logkit -f logkit.conf > ../logkit.out 2>&1 &
 else
   echo "please check your AKSK or account path"
 fi
-  

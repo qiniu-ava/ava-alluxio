@@ -15,7 +15,7 @@ if [ ! -d "./_package/" ];then
 else
   echo "logkit has been installed"
 fi
-  
+
 scriptDIR=$DIR/_package/script
 for file in $DIR/_package/confs/* ; do
   temp_file=`basename $file`
