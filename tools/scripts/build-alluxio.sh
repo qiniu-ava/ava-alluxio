@@ -13,6 +13,8 @@
 ##      optional, default: alluxio submodule path                        ##
 ##   --local-kodo=<absolute_path_to_your_kodo_repostory>                 ##
 ##      optional, default: kodo submodule path                           ##
+##   -p/--push=true/false whether to push docker image                   ##
+##      optional, default: true                                          ##
 ###########################################################################
 
 set -e
@@ -25,6 +27,7 @@ build_kodo=true
 build_image=true
 local_alluxio=$DIR/../../alluxio
 local_kodo=$DIR/../../kodo
+push_image=true
 
 for i in "$@"; do
   case $i in
@@ -42,6 +45,9 @@ for i in "$@"; do
     ;;
     --local-kodo=*)
       local_kodo="${i#*=}"
+    ;;
+    -p=*|--push=*)
+      push_image="${i#*=}"
     ;;
     *)
       # unknown option
@@ -103,8 +109,10 @@ if [ $build_image != "false" ]; then
   cd $local_alluxio && alluxio_hash=`git rev-parse --short=7 HEAD` && cd -
   cd $local_kodo && kodo_hash=`git rev-parse --short=7 HEAD` && cd -
   docker build -t alluxio:$alluxio_hash-$kodo_hash -f $DIR/docker-image/Dockerfile.alluxio .tmp/alluxio
-  docker tag alluxio:$alluxio_hash-$kodo_hash reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
-  docker push reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
+  if [ $push_image != "false" ]; then
+    docker tag alluxio:$alluxio_hash-$kodo_hash reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
+    docker push reg-xs.qiniu.io/atlab/alluxio:$alluxio_hash-$kodo_hash
+  fi
   echo -e "\n\n\n"
 else
   echo -e "skip building docker image\n\n\n"
