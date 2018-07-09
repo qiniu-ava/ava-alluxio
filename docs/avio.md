@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [avio](#avio)
+- [avio 使用文档](#avio-%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)
   - [概述](#%E6%A6%82%E8%BF%B0)
   - [相关概念](#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5)
     - [alluxio-fuse 文件系统](#alluxio-fuse-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F)
@@ -12,14 +12,16 @@
     - [preload](#preload)
     - [ls](#ls)
     - [stat](#stat)
+    - [save](#save)
     - [mv](#mv)
     - [cp](#cp)
     - [rm](#rm)
+    - [jobs](#jobs)
   - [帮助](#%E5%B8%AE%E5%8A%A9)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# avio
+# avio 使用文档
 
 ## 概述
 
@@ -42,22 +44,22 @@ avio <cmd> [options] [options]...
 
 ### 子命令列表
 
-| cmd | description | status |
-| :--- | :--- | :---: |
-| help | 查看帮助文档 | WIP |
-| preload | 将指定目录或者文件预加载到 alluxio 中，便于之后快速读取 | WIP |
-| ls | 列出指定目录或者文件的信息 | WIP |
-| stat | 查看指定目录或者文件在 alluxio 系统中的状况，比如是否已经加载缓存中，若已经加载进来位于哪一层级 | WIP |
-| mv | 将指定目录或者文件移动到/出 alluxio 中 | WIP |
-| cp | 将指定目录或者文件复制到/出 alluxio 中 | WIP |
-| rm | 删除指定目录或者文件 | WIP |
-
+| cmd     | description                                                                                   | status |
+|---------|-----------------------------------------------------------------------------------------------|--------|
+| help    | 查看帮助文档                                                                                  | WIP    |
+| preload | 将指定目录或者文件预加载到 alluxio 中，便于之后快速读取                                        | WIP    |
+| ls      | 列出指定目录或者文件的信息                                                                    | WIP    |
+| save    | 将指定目录同步到 bucket 中                                                                   | WIP    |
+| stat    | 查看指定目录或者文件在 alluxio 系统中的状况，比如是否已经加载缓存中，若已经加载进来位于哪一层级 | WIP    |
+| mv      | 将指定目录或者文件移动到/出 alluxio 中                                                        | WIP    |
+| cp      | 将指定目录或者文件复制到/出 alluxio 中                                                        | WIP    |
+| rm      | 删除指定目录或者文件                                                                          | WIP    |
+| jobs    | 列出当前最近的任务                                                                            | WIP    |
 
 ### preload
 
 avio preload [options] [path]
   + options:
-    + -d --depth 递归深度，默认值为 4，最大值为 10
     + -i --input-file 所有需要 preload 的文件的列表文件路径
     + --is-jsonlist 只在 -i/--input-file 被设置时有效，可选项：true/false ，默认值为 false
     + -p --pool 并行 preload 的并发数，默认值为 50，最大值为 200
@@ -85,6 +87,17 @@ avio stat [options] [path]
   + path:
     + 要统计的目录或者文件
 
+### save
+
+avio save [options] [path]
+  + options:
+    + -i --input-file 所有需要同步的文件的列表文件路径
+    + --is-jsonlist 只在 -i/--input-file 被设置时有效，可选项：true/false ，默认值为 false
+    + -p --pool 并行同步的并发数，默认值为 50，最大值为 200
+    + -l --log 当前任务的日志文件，默认值为 /var/log/avio/save-<datetime>-<pid>.log
+  + path:
+    + path 和 -i/--input-file 参数是互斥的，若两者都没有设置则将会 save 当前目录
+
 ### mv
 avio mv [options] <source> <target>  
   + options:
@@ -111,11 +124,25 @@ avio cp [options] <source> <target>
 **目前能支持的通配符只有\*，且 source 和 target 中至少需要有一个是在 alluxio-fuse 文件系统中*
 
 ### rm
+
 avio rm <path>
   + path:
     + 要删除的目录或者文件
 
 **在任务启动之前会尝试查看找到的第一个文件所在的文件系统的 mountpoint，若发现此 mountpoint 不是 alluxio-fuse 类型的文件系统，将退出程序(且退出码非 0 )。*
+
+### jobs
+
+avio jobs [options] \<command> [job_id]
+  + options
+    + -t --type   任务类型，可选参数，可用来过滤列表，可选值为 preload、save、stat等，只有在 command 为 list 时生效
+    + -s --size   列表长度，可选参数，默认值为 20，最大值 200，只有在 command 为 list 时生效
+    + -p --page   列表分页的页号，可选参数，默认值为 0，只有在 command 为 list 时生效
+    + -S --status 过滤状态，可选参数，可选值为 done、running、creating、failed、terminated，只有在 command 为 list 时生效
+  + command
+    + 对任务执行相应操作，包括 list/stop/rm/describe，command 为 list 时，job_id 应为空
+  + job_id
+    + 任务ID，只有在 command 为非 list 值时有效
 
 ## 帮助
 
