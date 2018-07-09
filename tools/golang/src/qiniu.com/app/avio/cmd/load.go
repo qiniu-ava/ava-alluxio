@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	constants "qiniu.com/app/avio/constants"
 	util "qiniu.com/app/avio/util"
 )
 
@@ -34,19 +35,19 @@ type WorkerMetrics struct {
 }
 
 type CMD struct {
-	input           string
-	prefix          string
-	isJSONList      bool
-	pool            uint
-	path            string
-	log             string
-	scannerFinished bool
-	readWg          sync.WaitGroup
-	readCh          chan string
-	messageWg       sync.WaitGroup
-	messageCh       chan FetchMessage
-	metrics         *WorkerMetrics
-	metricsMu       sync.Mutex
+	input        string
+	prefix       string
+	isJSONList   bool
+	pool         uint
+	path         string
+	log          string
+	listFinished bool
+	readWg       sync.WaitGroup
+	readCh       chan string
+	messageWg    sync.WaitGroup
+	messageCh    chan FetchMessage
+	metrics      *WorkerMetrics
+	metricsMu    sync.Mutex
 }
 
 func (c *CMD) init(flags *loadFlags) {
@@ -73,12 +74,20 @@ func (c *CMD) init(flags *loadFlags) {
 }
 
 func (c *CMD) start() {
+	if c.path != "" {
+		c.startWalk()
+	} else {
+		c.startScan()
+	}
+}
+
+func (c *CMD) startScan() {
 	c.readWg = sync.WaitGroup{}
 	c.messageWg = sync.WaitGroup{}
 	c.readCh = make(chan string, c.pool)
 	c.messageCh = make(chan FetchMessage, c.pool)
 	c.metricsMu = sync.Mutex{}
-	c.scannerFinished = false
+	c.listFinished = false
 	file, err := os.Open(c.input)
 	if err != nil {
 		log.Fatalf("open failed: %v", err)
@@ -119,6 +128,61 @@ func (c *CMD) start() {
 			c.messageCh <- msg
 		}()
 	}
+
+	time.Sleep(time.Second)
+
+	c.readWg.Wait()
+	c.messageWg.Wait()
+	close(c.readCh)
+	close(c.messageCh)
+}
+
+func (c *CMD) startWalk() {
+	c.readWg = sync.WaitGroup{}
+	c.messageWg = sync.WaitGroup{}
+	c.readCh = make(chan string, c.pool)
+	c.messageCh = make(chan FetchMessage, c.pool)
+	c.metricsMu = sync.Mutex{}
+	c.listFinished = false
+
+	go func() {
+		for {
+			select {
+			case msg := <-c.messageCh:
+				c.messageWorker(msg)
+				c.messageWg.Done()
+			}
+		}
+	}()
+
+	walker := util.NewDFWalker(c.path, constants.MAX_DEPTH, true)
+	e := walker.Walk(func(msg *util.WalkerMsg) {
+		if !msg.EOF && !msg.Info.IsDir() {
+			// handlePath(msg.Info, msg.Path)
+			// todo: post message
+			c.scannerAdjust()
+			c.readCh <- msg.Path
+			c.metricsMu.Lock()
+			c.metrics.jobs++
+			c.metricsMu.Unlock()
+			c.readWg.Add(1)
+			go c.worker()
+		}
+	})
+
+	if e != nil {
+		fmt.Printf("failed to walk, err: %s", e)
+	}
+
+	func() {
+		c.messageWg.Add(1)
+		msg := FetchMessage{
+			path:    "",
+			ok:      true,
+			message: "all done",
+		}
+		c.messageCh <- msg
+	}()
 
 	time.Sleep(time.Second)
 
@@ -209,11 +273,11 @@ func (c *CMD) messageWorker(msg FetchMessage) {
 	}
 
 	if msg.ok && msg.message == "all done" {
-		c.scannerFinished = true
+		c.listFinished = true
 		fmt.Printf("[%s] finish scanning, totally %d files to load\n", time.Now().Format("2006-01-02 15:04:05"), c.metrics.jobs)
 	}
 
-	if c.scannerFinished && c.metrics.doneJobs == c.metrics.jobs+1 {
+	if c.listFinished && c.metrics.doneJobs == c.metrics.jobs+1 {
 		fmt.Printf("[%s] handled all items, total: %d, failed: %d, success: %d\n", time.Now().Format("2006-01-02 15:04:05"), c.metrics.jobs, c.metrics.failedJobs, c.metrics.successfulJobs-1)
 	}
 	c.metricsMu.Unlock()
@@ -245,39 +309,27 @@ type loadFlags struct {
 
 func (f *loadFlags) Validate() error {
 	if f.PoolSize > 100 || f.PoolSize < 1 {
-		return &util.AvioError{
-			Msg: "请设置合法的参数，poolSize 参数最大值为 100，最小值为 1",
-		}
+		return util.NewAvioError(util.ARGUMENT_ERROR_PRELOAD, "请设置合法的参数，poolSize 参数最大值为 100，最小值为 1")
 	}
 
 	if f.Depth > 10 || f.Depth < 1 {
-		return &util.AvioError{
-			Msg: "请设置合法的参数，depth 参数最大值为 10，最小值为 1",
-		}
+		return util.NewAvioError(util.ARGUMENT_ERROR_PRELOAD, "请设置合法的参数，depth 参数最大值为 10，最小值为 1")
 	}
 
 	if len(f.Args) > 1 {
-		return &util.AvioError{
-			Msg: "当前只支持一次加载一个指定目录或者文件，一次加载多个目录或者文件的功能将在后续支持",
-		}
+		return util.NewAvioError(util.ARGUMENT_ERROR_PRELOAD, "当前只支持一次加载一个指定目录或者文件，一次加载多个目录或者文件的功能将在后续支持")
 	}
 
 	if len(f.Args) == 1 && f.Source != "" {
-		return &util.AvioError{
-			Msg: "-i/--input-file 参数和 path 只能同时设置一个",
-		}
+		return util.NewAvioError(util.ARGUMENT_ERROR_PRELOAD, "-i/--input-file 参数和 path 只能同时设置一个")
 	}
 
 	if f.IsJSONList != "false" && f.IsJSONList != "true" {
-		return &util.AvioError{
-			Msg: "--is-jsonlist 参数的可选项为 false/true",
-		}
+		return util.NewAvioError(util.ARGUMENT_ERROR_PRELOAD, "--is-jsonlist 参数的可选项为 false/true")
 	}
 
 	if f.IsJSONList == "true" && f.Source != "" {
-		return &util.AvioError{
-			Msg: "--is-jsonlist 参数只有在指定了 -i/--input-file 参数时有效",
-		}
+		return util.NewAvioError(util.ARGUMENT_ERROR_PRELOAD, "--is-jsonlist 参数只有在指定了 -i/--input-file 参数时有效")
 	}
 
 	if f.Source != "" && f.Depth != 4 {

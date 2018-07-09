@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sync"
 )
 
 type WalkStatus int
@@ -15,7 +16,7 @@ var (
 	Walked    WalkStatus = 2
 )
 
-func (w *WalkStatus) increase() *WalkError {
+func (w *WalkStatus) increase() *AvioError {
 	switch *w {
 	case NotWalked:
 		w = &Walking
@@ -24,9 +25,9 @@ func (w *WalkStatus) increase() *WalkError {
 		w = &Walked
 		break
 	default:
-		return &WalkError{
-			code: WalkStatusError,
-			msg:  "invalid walk status to increase",
+		return &AvioError{
+			code: WALK_ERROR_INVALID_STATUS,
+			msg:  ErrorMessage[WALK_ERROR_INVALID_STATUS],
 		}
 	}
 	return nil
@@ -43,9 +44,9 @@ type tree struct {
 
 func (t *tree) walk() error {
 	if t.status != NotWalked {
-		return &WalkError{
-			code: WalkStatusError,
-			msg:  "invalid walk status to start walk",
+		return &AvioError{
+			code: WALK_ERROR_INVALID_STATUS,
+			msg:  ErrorMessage[WALK_ERROR_INVALID_STATUS],
 		}
 	}
 
@@ -70,18 +71,18 @@ func (t *tree) walk() error {
 	return nil
 }
 
+var wg = sync.WaitGroup{}
+
 type IWalker interface {
 	Walk() *tree
 }
 
 // DFWalker depth-first walker
 type DFWalker struct {
-	root        string
-	depth       uint
-	full        bool
-	tree        *tree
-	currentPath []string
-	generatorCh chan GeneratorMsg
+	root  string
+	depth uint
+	full  bool
+	tree  *tree
 }
 
 func NewDFWalker(root string, depth uint, full bool) *DFWalker {
@@ -102,66 +103,54 @@ func NewDFWalker(root string, depth uint, full bool) *DFWalker {
 			status:    NotWalked,
 			children:  make(map[string]tree),
 		},
-		generatorCh: make(chan GeneratorMsg, 1024),
 	}
 }
 
-func (b *DFWalker) Walk() (g PathGenerator, e error) {
+type WalkProgressHandler func(msg *WalkerMsg)
+
+func (b *DFWalker) Walk(handler WalkProgressHandler) error {
 	lastLen := 0
 	for len(b.tree.children)%1000 == 0 && len(b.tree.children) == lastLen {
 		lastLen = len(b.tree.children)
-		e = b.tree.walk()
+		e := b.tree.walk()
 		if e != nil {
-			return
+			return e
 		}
 		if b.full {
 			break
 		}
 	}
 
-	g = PathGenerator{b.generatorCh}
 	for _, childTree := range b.tree.children {
-		b.postMsg(nil, false, path.Join(b.tree.directory, b.tree.info.Name(), childTree.info.Name()), childTree.info)
+		handler(&WalkerMsg{
+			Err:  nil,
+			EOF:  false,
+			Path: path.Join(b.tree.directory, b.tree.info.Name(), childTree.info.Name()),
+			Info: childTree.info,
+		})
+		if b.depth > 1 && childTree.info.IsDir() {
+			innerWalker := NewDFWalker(path.Join(b.tree.directory, b.tree.info.Name(), childTree.info.Name()), b.depth-1, b.full)
+			innerWalker.Walk(func(msg *WalkerMsg) {
+				if !msg.EOF {
+					handler(msg)
+				}
+			})
+		}
 	}
 
-	b.postMsg(nil, true, "", nil)
+	handler(&WalkerMsg{
+		Err:  nil,
+		EOF:  true,
+		Path: "",
+		Info: nil,
+	})
 
-	return
+	return nil
 }
 
-func (b *DFWalker) postMsg(e error, eof bool, path string, info os.FileInfo) {
-	b.generatorCh <- GeneratorMsg{
-		Err:  e,
-		EOF:  eof,
-		Path: path,
-		Info: info,
-	}
-}
-
-func (b *DFWalker) Close() {
-	close(b.generatorCh)
-}
-
-type GeneratorMsg struct {
+type WalkerMsg struct {
 	Err  error
 	EOF  bool
 	Path string
 	Info os.FileInfo
-}
-
-type PathGenerator struct {
-	ch chan GeneratorMsg
-}
-
-func (g *PathGenerator) Next() (msg GeneratorMsg) {
-	msg = <-g.ch
-	return
-}
-
-// @{TODO} breadth-first walker
-type BFWalker struct {
-}
-
-func (b *BFWalker) Walk() (g PathGenerator) {
-	return PathGenerator{}
 }

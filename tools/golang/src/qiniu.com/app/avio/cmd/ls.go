@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"qiniu.com/app/avio/constants"
+
 	"qiniu.com/app/avio/util"
 
 	"github.com/spf13/cobra"
@@ -21,6 +23,9 @@ type lsArguments struct {
 }
 
 func (l *lsArguments) validate() error {
+	if !l.Full && l.Recursive {
+		return util.NewAvioError(util.ARGUMENT_ERROR_LIST, util.ErrorMessage[util.ARGUMENT_ERROR_LIST])
+	}
 	return nil
 }
 
@@ -32,7 +37,7 @@ var mLsArguments = &lsArguments{}
 
 func init() {
 	rootCmd.AddCommand(lsCmd)
-	lsCmd.Flags().BoolVarP(&mLsArguments.Full, "full", "f", false, "当指定的路径下文件或子目录数量超过 5000 时，是否全量拉取，默认值为 true")
+	lsCmd.Flags().BoolVarP(&mLsArguments.Full, "full", "f", false, "当指定的路径下文件或子目录数量超过 5000 时，是否全量拉取，默认值为 false")
 	lsCmd.Flags().BoolVarP(&mLsArguments.Humanable, "humanable", "H", false, "以易读的方式显示文件大小")
 	lsCmd.Flags().BoolVarP(&mLsArguments.Recursive, "recursive", "r", false, "递归的列出目录下子目录中的文件")
 	lsCmd.Flags().BoolVarP(&mLsArguments.Count, "count", "c", false, "只显示目录下的文件或子目录数")
@@ -92,28 +97,26 @@ var lsCmd = &cobra.Command{
 
 		var depth uint = 2
 		if mLsArguments.Recursive {
-			depth = 10
+			depth = constants.MAX_DEPTH
 		}
 
+		var count uint32 = 0 // max files to list 4,294,967,295
 		walker := util.NewDFWalker(path, depth, mLsArguments.Full)
-		defer walker.Close()
-		g, e := walker.Walk()
+		e := walker.Walk(func(msg *util.WalkerMsg) {
+			if !msg.EOF {
+				count++
+				if !mLsArguments.Count {
+					handlePath(msg.Info, msg.Path)
+				}
+			} else {
+				printTotal(count)
+			}
+		})
 
 		if e != nil {
 			fmt.Printf("failed to walk, err: %s", e)
 			return
 		}
-
-		var count uint32 = 0 // max files to list 4,294,967,295
-		msg := g.Next()
-		for msg.Err == nil && !msg.EOF {
-			count++
-			if !mLsArguments.Count {
-				handlePath(msg.Info, msg.Path)
-			}
-			msg = g.Next()
-		}
-		printTotal(count)
 	},
 }
 
@@ -126,5 +129,9 @@ func handlePath(info os.FileInfo, filepath string) {
 }
 
 func printTotal(count uint32) {
-	fmt.Printf("total %d\n", count)
+	if !mLsArguments.Full && count%1000 == 0 {
+		fmt.Printf("list %d, but there may be more than %ds items\n", count, count)
+	} else {
+		fmt.Printf("total %d\n", count)
+	}
 }

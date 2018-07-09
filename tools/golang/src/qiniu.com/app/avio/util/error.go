@@ -1,32 +1,40 @@
 package util
 
-type AvioError struct {
-	Msg string
-}
+type AvioErrorCode uint
 
-func (a *AvioError) Error() string {
-	return a.Msg
-}
+const (
+	ARGUMENT_ERROR_LIST AvioErrorCode = iota + 100100
+	ARGUMENT_ERROR_PRELOAD
+	ARGUMENT_ERROR_STAT
+	ARGUMENT_ERROR_CP
+	ARGUMENT_ERROR_MV
 
-type WalkErrorCode uint
-
-var (
-	WalkStatusError WalkErrorCode = 0x000001
+	WALK_ERROR_INVALID_STATUS AvioErrorCode = iota + 100200
 )
 
-type WalkError struct {
-	code WalkErrorCode
+var ErrorMessage map[AvioErrorCode]string = map[AvioErrorCode]string{
+	ARGUMENT_ERROR_LIST:    "ls 命令参数错误",
+	ARGUMENT_ERROR_PRELOAD: "preload 命令参数错误",
+	ARGUMENT_ERROR_STAT:    "stat 命令参数错误",
+	ARGUMENT_ERROR_CP:      "cp 命令参数错误",
+	ARGUMENT_ERROR_MV:      "mv 命令参数错误",
+
+	WALK_ERROR_INVALID_STATUS: "invalid walk status to increase",
+}
+
+type AvioError struct {
+	code AvioErrorCode
 	msg  string
 }
 
-func newWalkError(code WalkErrorCode, msg string) *WalkError {
-	return &WalkError{code, msg}
+func NewAvioError(code AvioErrorCode, msg string) *AvioError {
+	return &AvioError{code, msg}
 }
 
-func (w *WalkError) Code() WalkErrorCode {
-	return w.code
+func (a *AvioError) Error() string {
+	return a.msg
 }
 
-func (w *WalkError) Error() string {
-	return w.msg
+func (a *AvioError) Code() AvioErrorCode {
+	return a.code
 }
