@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	VERSION = "0.1.2" // declare-version
+	VERSION = "0.2.0" // declare-version
 )
 
 func init() {

@@ -7,7 +7,7 @@ BGREEN='\033[1;32m'
 NC='\033[0m' # No Color
 
 version=` \
-  grep 'declare-version' ./tools/golang/src/qiniu.com/app/avio/main.go \
+  grep 'declare-version' ./tools/golang/src/qiniu.com/app/avio/cmd/version.go \
     | awk -F'"' '{print $2}' \
 `
 
