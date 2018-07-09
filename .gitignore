@@ -23,6 +23,9 @@ build/*
 .tmp
 
 
+.vscode
+
 tools/golang/bin
 tools/golang/pkg
+tools/golang/.cache
 

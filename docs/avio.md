@@ -1,3 +1,24 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [avio](#avio)
+  - [概述](#%E6%A6%82%E8%BF%B0)
+  - [相关概念](#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5)
+    - [alluxio-fuse 文件系统](#alluxio-fuse-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F)
+  - [设计](#%E8%AE%BE%E8%AE%A1)
+    - [使用示例](#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B)
+    - [子命令列表](#%E5%AD%90%E5%91%BD%E4%BB%A4%E5%88%97%E8%A1%A8)
+    - [preload](#preload)
+    - [ls](#ls)
+    - [stat](#stat)
+    - [mv](#mv)
+    - [cp](#cp)
+    - [rm](#rm)
+  - [帮助](#%E5%B8%AE%E5%8A%A9)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # avio
 
 ## 概述

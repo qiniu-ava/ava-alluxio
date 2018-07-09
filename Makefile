@@ -28,7 +28,7 @@ tools:
 tools-clean: tools-golang-clean
 
 tools-golang-clean:
-	rm -rf tools/golang/bin/*
+	rm -rf tools/golang/bin/avio tools/golang/bin/linux_amd64
 
 tools-golang: tools-golang-clean tools-golang-macos tools-golang-linux
 
