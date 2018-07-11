@@ -5,7 +5,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cmd=$1
 
 if [ "$cmd" = "" ]; then
-  echo "usage: ./alluxio.worker.sh <cmd>, where cmd should be one of pull/start/restart/remove/status"
+  echo "usage: ./alluxio.worker.fat.sh <cmd>, where cmd should be one of pull/start/restart/remove/status"
   exit 1
 fi
 
