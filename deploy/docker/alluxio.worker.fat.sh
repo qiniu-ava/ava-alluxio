@@ -12,8 +12,8 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  ram_size=50G
-  ram_tier_size=40G
+  ram_size=40G
+  ram_tier_size=30G
   if [ ! -d /mnt/ramdisk ]; then
     sudo mkdir -p /mnt/ramdisk
     sudo mount -t ramfs -o size=${ram_size} ramfs /mnt/ramdisk

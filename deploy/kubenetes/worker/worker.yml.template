@@ -72,10 +72,13 @@ spec:
       restartPolicy: Always
       volumes:
         - name: alluxio-ramdisk
-          emptyDir:
-            medium: "Memory"
+          hostPath:
+            path: <ramdisk_path>
+            type: Directory
         - name: alluxio-data
-          emptyDir: {}
+          hostPath:
+            path: <alluxio_understorage_path>
+            type: Directory
         - name: alluxio-cache1
           hostPath:
             path: /disk3
