@@ -1,0 +1,89 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: alluxio-worker-readonly
+spec:
+  template:
+    metadata:
+      labels:
+        app: alluxio-worker-readonly
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - jq18
+                - jq22
+                - jq23
+                - jq24
+                - jq25
+      imagePullSecrets:
+        - name: atlab-images
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: alluxio-worker-readonly
+          image: reg-xs.qiniu.io/atlab/alluxio:<tag>
+          imagePullPolicy: Always
+          command: ["/entrypoint.sh"]
+          args: ["worker", "--no-format"]
+          env:
+            - name: ALLUXIO_LOCALITY_NODE
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: ALLUXIO_WORKER_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          envFrom:
+          - configMapRef:
+            name: alluxio-worker-config
+          ports:
+          - containerPort: 29998
+            hostPort: 29998
+            name: rpc
+          - containerPort: 29999
+            hostPort: 29999
+            name: data
+          - containerPort: 30000
+            hostPort: 30000
+            name: web
+          volumeMounts:
+            - name: alluxio-ramdisk
+              mountPath: /opt/ramdisk
+            - name: alluxio-data
+              mountPath: /underStorage
+            - name: alluxio-cache1
+              mountPath: /opt/cachedisk1
+            - name: alluxio-cache2
+              mountPath: /opt/cachedisk2
+          resources:
+            requests:
+              cpu: 2
+              memory: 15Gi
+            limits:
+              cpu: 2
+              memory: 15Gi
+      restartPolicy: Always
+      volumes:
+        - name: alluxio-ramdisk
+          hostPath:
+            path: <ramdisk_path>
+            type: Directory
+        - name: alluxio-data
+          hostPath:
+            path: <alluxio_understorage_path>
+            type: Directory
+        - name: alluxio-cache1
+          hostPath:
+            path: /disk3
+            type: Directory
+        - name: alluxio-cache2
+          hostPath:
+            path: /disk4
+            type: Directory
