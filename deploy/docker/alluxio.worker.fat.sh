@@ -21,7 +21,7 @@ start() {
     mkdir -p /mnt/ramdisk/data
   fi
 
-  for i in $(seq 1 9);do
+  for i in $(seq 1 12);do
     mkdir -p /disk${i}/alluxio/data/cachedisk
   done
   mkdir -p /disk2/alluxio/data/underStorage
@@ -44,8 +44,8 @@ start() {
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.75 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.5 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk7,/opt/cachedisk8,/opt/cachedisk9 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=700GB,700GB,250GB \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk7,/opt/cachedisk8,/opt/cachedisk9,/opt/cachedisk10,/opt/cachedisk11,/opt/cachedisk12 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=700GB,700GB,250GB,1800GB,1800GB,1800GB \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.8 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.7 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL2_ALIAS=HDD \
@@ -77,6 +77,9 @@ start() {
     -v /disk7/alluxio/data/cachedisk:/opt/cachedisk7 \
     -v /disk8/alluxio/data/cachedisk:/opt/cachedisk8 \
     -v /disk9/alluxio/data/cachedisk:/opt/cachedisk9 \
+    -v /disk10/alluxio/data/cachedisk:/opt/cachedisk10 \
+    -v /disk11/alluxio/data/cachedisk:/opt/cachedisk11 \
+    -v /disk12/alluxio/data/cachedisk:/opt/cachedisk12 \
     -v /alluxio-share/alluxio/underStorage:/underStorage \
     alluxio \
     worker --no-format
