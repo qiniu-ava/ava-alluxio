@@ -1,3 +1,4 @@
+#!/bin/bash
 
 reborn_master() {
   kubectl delete -f ./master.yml
