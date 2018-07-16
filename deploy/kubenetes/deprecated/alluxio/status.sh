@@ -1,3 +1,4 @@
+#!/bin/bash
 
 status_master() {
   echo "checking status of alluxio master"

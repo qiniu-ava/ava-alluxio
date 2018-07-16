@@ -10,7 +10,7 @@ update:
 	git submodules update
 
 hint:
-	@echo TODO && exit 1
+	@./tools/scripts/linter.sh
 
 build:
 	./tools/scripts/build-alluxio.sh
