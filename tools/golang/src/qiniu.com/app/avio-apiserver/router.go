@@ -15,8 +15,8 @@ func initRouter() *gin.Engine {
 	router.GET("/jobs/:name", jobService.GetJobInfo)
 	router.GET("/jobs", jobService.ListJobs)
 	router.POST("/jobs", jobService.CreateJob)
-	router.PUT("/jobs", jobService.UpdateJobInfo)
-	router.DELETE("/jobs", jobService.DeleteJobInfo)
+	router.PUT("/jobs/:name", jobService.UpdateJobInfo)
+	router.DELETE("/jobs/:name", jobService.DeleteJobInfo)
 
 	return router
 }

@@ -9,14 +9,15 @@ import (
 const jobCollectionName string = "job"
 
 type ListJobQuery struct {
-	Limit int
-	Skip  int
-	Uit   int
+	Limit int `json:"limit"`
+	Skip  int `json:"skip"`
+	UID   int `json:"uid"`
 }
 
 type ListJobResult struct {
-	Query ListJobQuery   `json: "query"`
-	Items []typo.JobInfo `json: "items"`
+	Query ListJobQuery   `json:"query"`
+	Items []typo.JobInfo `json:"items"`
+	Total int            `json:"total"`
 }
 
 type JobDao interface {

@@ -96,4 +96,114 @@ Authorization: QBox <auth_token>
 
 ### login
 
-### preload
+### jobs
+
+* **创建任务**
+
+请求
+
+``` HTTP
+POST /jobs
+Content-Type: application/json
+
+<JobSpec:object>
+```
+
+返回
+
+``` HTTP
+200 OK
+Content-Type: application/json
+{
+    "name": <string>
+}
+```
+
+* **列出任务**
+
+请求
+
+``` HTTP
+GET /jobs?limit=<number>&skip=<number>&uid=<number>
+```
+
+返回
+
+``` HTTP
+200 OK
+Content-Type: application/json
+{
+  "query": {
+    "limit": <number>,
+    "skip": <number>,
+    "uid": <number>
+  },
+  items: [<JobInfo:object>, ...<JobInfo:object>],
+  total: <number>
+}
+```
+
+* **查看任务详情**
+
+请求
+
+``` HTTP
+
+GET /jobs/<job_name>
+X-UID:<number>
+
+```
+
+返回
+
+``` HTTP
+
+200 OK
+Content-Type: application/json
+
+<JobInfo:object>
+
+```
+
+* **更新任务详情**
+
+请求
+
+``` HTTP
+
+PUT /jobs/<job_name>
+X-UID: <number>
+<JobInfo:object>
+
+```
+
+返回
+
+``` HTTP
+
+200 OK
+Content-Type: application/json
+
+<JobInfo:object>
+
+```
+
+* **删除任务**
+
+请求
+
+``` HTTP
+
+DELETE /jobs/<job_name>
+X-UID: <number>
+
+```
+
+返回
+
+``` HTTP
+
+200 OK
+{}
+
+```
