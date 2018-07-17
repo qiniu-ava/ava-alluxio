@@ -1,0 +1,22 @@
+package main
+
+import (
+	"qiniu.com/app/avio-apiserver/services"
+
+	"github.com/gin-gonic/gin"
+)
+
+func initRouter() *gin.Engine {
+	router := gin.New()
+	router.Use(gin.Recovery())
+
+	jobService := services.NewJobService()
+
+	router.GET("/jobs/:name", jobService.GetJobInfo)
+	router.GET("/jobs", jobService.ListJobs)
+	router.POST("/jobs", jobService.CreateJob)
+	router.PUT("/jobs", jobService.UpdateJobInfo)
+	router.DELETE("/jobs", jobService.DeleteJobInfo)
+
+	return router
+}
