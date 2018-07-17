@@ -25,24 +25,25 @@ const (
 )
 
 type JobParams struct {
-	AlluxioUri   string `json: "alluxioUri"`
-	Depth        int    `json: "depth"`
-	FromFileList bool   `json: "fromFileList"`
+	AlluxioURI   string `json:"alluxioUri"`
+	Depth        int    `json:"depth"`
+	FromFileList bool   `json:"fromFileList"`
 }
 
 type JobSpec struct {
 	Name   string    `json:"name"`
-	Uid    int       `json: "uid"`
-	Type   JobType   `json: "type"`
-	Params JobParams `json: "params"`
+	UID    int       `json:"uid"`
+	Type   JobType   `json:"type"`
+	Params JobParams `json:"params"`
 }
 
 type JobInfo struct {
 	ID         bson.ObjectId `json:"id" bson:"_id,omitempty"`
 	JobSpec    `bson:",inline"`
-	Status     JobStatus  `json: "status"`
+	Status     JobStatus  `json:"status"`
 	CreateTime *time.Time `json:"createTime,omitempty" bson:"createTime,omitempty"`
 	UpdateTime *time.Time `json:"updateTime,omitempty" bson:"updateTime,omitempty"`
+	FinishTime *time.Time `json:"finishTime,omitempty" bson:"finishTime,omitempty"`
 	Message    string     `json:"message,omitempty" bson:"message,omitempty"`
 }
 
