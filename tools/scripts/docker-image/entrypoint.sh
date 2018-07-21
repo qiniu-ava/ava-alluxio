@@ -55,12 +55,17 @@ alluxio_env_vars=(
   ALLUXIO_WORKER_JAVA_OPTS
 )
 
-for keyvaluepair in $(env); do
-  # split around the "="
-  key=$(echo ${keyvaluepair} | cut -d= -f1)
-  value=$(echo ${keyvaluepair} | cut -d= -f2-)
+compgen -v | while read key; do
+  value=${!key}
   if [[ "${alluxio_env_vars[*]}" =~ "${key}" ]]; then
-    echo "export ${key}=${value}" >> conf/alluxio-env.sh
+    # wrap string value with "" to get rid of values with spaces/# .eg charactors
+    if [ "$value" -eq "$value" ] 2>/dev/null; then
+      echo "export ${key}=${value}" >> conf/alluxio-env.sh
+    elif [[ "$value" == "true" || "$value" == "false" ]]; then
+      echo "export ${key}=${value}" >> conf/alluxio-env.sh
+    else
+      echo "export ${key}=\"${value}\"" >> conf/alluxio-env.sh
+    fi
   elif [[ ${key} == ALLUXIO_* ]]; then
     # check if property name is valid
     echo "get env config: ${key}=${value}"
