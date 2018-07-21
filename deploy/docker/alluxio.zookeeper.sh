@@ -31,4 +31,5 @@ docker run -d \
   -v /alluxio-share/zookeeper/$myip/config:/conf \
   -v /alluxio-share/zookeeper/$myip/data:/data \
   -v /alluxio-share/zookeeper/$myip/log:/datalog \
+  --restart=always \
   zookeeper:3.4

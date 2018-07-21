@@ -12,11 +12,12 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  ram_size=180G
-  ram_tier_size=170G
+  container_mem_size=30g # worker 容器运行时申请的内存上线
+  worker_mem_size=25G # worker 进程运行时占用的内存大小
+  ram_tier_size=100G
   if [ ! -d /mnt/ramdisk ]; then
     sudo mkdir -p /mnt/ramdisk
-    sudo mount -t ramfs -o size=${ram_size} ramfs /mnt/ramdisk
+    sudo mount -t ramfs -o size=${ram_tier_size} ramfs /mnt/ramdisk
     sudo chmod a+w /mnt/ramdisk
     mkdir -p /mnt/ramdisk/data
   fi
@@ -34,16 +35,18 @@ start() {
   docker run -d \
     --name alluxio-worker \
     --hostname ${myip} \
+    -m ${container_mem_size} \
+    -e ALLUXIO_JAVA_OPTS="-Xms16g -Xmx16g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
     -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
     -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
-    -e ALLUXIO_WORKER_MEMORY_SIZE=$ram_size \
+    -e ALLUXIO_WORKER_MEMORY_SIZE=${worker_mem_size} \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=2 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/ramdisk \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=$ram_tier_size \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=${ram_tier_size} \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.75 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.5 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
@@ -73,6 +76,7 @@ start() {
     -v /disk5/alluxio/data/cachedisk:/opt/cachedisk5 \
     -v /disk6/alluxio/data/cachedisk:/opt/cachedisk6 \
     -v /alluxio-share/alluxio/underStorage:/underStorage \
+    --restart=always \
     alluxio \
     worker --no-format
 }

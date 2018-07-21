@@ -12,11 +12,8 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  ram_size_number=8
-  ram_size=${ram_size_number}G
-  docker_mem=`awk -v ram_size_number=${ram_size_number} 'BEGIN{docker_mem=(1.3*ram_size_number); print docker_mem;}'`
-  docker_mem=`echo ${docker_mem} | awk 'function ceil(x, y){y=int(x); return(x>y?y+1:y)} {print ceil($0)}'`
-  docker_mem=${docker_mem}g
+  container_mem_size=16g
+  worker_mem_size=8G
 
   mkdir -p /alluxio-share/alluxio/workers/${myip}/tmp
   mkdir -p /alluxio-share/alluxio/workers/${myip}/cachedisk
@@ -27,7 +24,8 @@ start() {
   docker run -d \
     --name alluxio-worker-writer \
     --hostname ${myip} \
-    -m ${docker_mem} \
+    -m ${container_mem_size} \
+    -e ALLUXIO_JAVA_OPTS="-Xms8g -Xmx8g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_PORT=${ALLUXIO_WRITE_WORKER_PORT} \
@@ -36,19 +34,19 @@ start() {
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
     -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
     -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
-    -e ALLUXIO_WORKER_MEMORY_SIZE=$ram_size \
+    -e ALLUXIO_WORKER_MEMORY_SIZE=${worker_mem_size} \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=1 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=SSD \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/cachedisk \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=4TB \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.6 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.4 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.01 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.002 \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_ENABLED=true \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_INTERVAL=10000 \
-    -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=2048 \
-    -e ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS=2048 \
-    -e ALLUXIO_USER_FILE_MASTER_CLIENT_THREADS=1024 \
-    -e ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=8192 \
+    -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=1024 \
+    -e ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS=1024 \
+    -e ALLUXIO_USER_FILE_MASTER_CLIENT_THREADS=512 \
+    -e ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=2048 \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
@@ -60,6 +58,7 @@ start() {
     -v /alluxio-share/alluxio/workers/${myip}/tmp:/tmp \
     -v /alluxio-share/alluxio/workers/${myip}/cachedisk:/opt/cachedisk \
     -v /alluxio-share/alluxio/workers/${myip}/underStorage:/underStorage \
+    --restart=always \
     alluxio \
     worker --no-format
 }
