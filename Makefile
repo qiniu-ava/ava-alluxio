@@ -2,6 +2,7 @@ SHELL:=/bin/bash
 GOROOT:=$(shell echo ${GOROOT})
 GOPATH:=$(shell pwd)/tools/golang
 DIR:=$(shell pwd)
+KAFKA_VERSION:=0.10.2.1
 
 clean:
 	@echo TODO && exit 1
@@ -21,6 +22,14 @@ reborn:
 	./docker/alluxio.worker.sh restart
 	@sleep 3
 	./docker/alluxio.client.sh restart
+
+kafka:
+	cd docker/app/kafka && docker build --build-arg KAFKA_VERSION=${KAFKA_VERSION} -t reg-xs.qiniu.io/atlab/avio-kafka .
+
+zookeeper:
+	cd docker/app/zookeeper && docker build -t reg-xs.qiniu.io/atlab/avio-zookeeper .
+	
+
 
 tools:
 	@echo TODO && exit 1
