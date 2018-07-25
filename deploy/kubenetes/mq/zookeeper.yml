@@ -1,0 +1,147 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ava-zk-svc
+  namespace: ava-prd
+  labels:
+    app: ava-zk-svc
+spec:
+  ports:
+  - port: 2888
+    name: server
+  - port: 3888
+    name: leader-election
+  clusterIP: None
+  selector:
+    app: ava-zk
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ava-zk-cm
+  namespace: ava-prd
+data:
+  jvm.heap: "1G"
+  tick: "2000"
+  init: "10"
+  sync: "5"
+  client.cnxns: "60"
+  snap.retain: "3"
+  purge.interval: "0"
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: ava-zk-pdb
+spec:
+  selector:
+    matchLabels:
+      app: ava-zk
+  minAvailable: 2
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: ava-zk
+  namespace: ava-prd
+spec:
+  serviceName: ava-zk-svc
+  replicas: 3
+  template:
+    metadata:
+      namespace: ava-prd
+      labels:
+        app: ava-zk
+    spec:
+      imagePullSecrets:
+      - name: atlab-images
+      containers:
+      - name: ava-zk
+        imagePullPolicy: Always
+        image: reg-xs.qiniu.io/atlab/avio-zookeeper
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 2181
+          name: client
+        - containerPort: 2888
+          name: server
+        - containerPort: 3888
+          name: leader-election
+        env:
+        - name : ZK_REPLICAS
+          value: "3"
+        - name : ZK_HEAP_SIZE
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: jvm.heap
+        - name : ZK_TICK_TIME
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: tick
+        - name : ZK_INIT_LIMIT
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: init
+        - name : ZK_SYNC_LIMIT
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: tick
+        - name : ZK_MAX_CLIENT_CNXNS
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: client.cnxns
+        - name: ZK_SNAP_RETAIN_COUNT
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: snap.retain
+        - name: ZK_PURGE_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+                name: ava-zk-cm
+                key: purge.interval
+        - name: ZK_CLIENT_PORT
+          value: "2181"
+        - name: ZK_SERVER_PORT
+          value: "2888"
+        - name: ZK_ELECTION_PORT
+          value: "3888"
+        command:
+        - sh
+        - -c
+        - zkGenConfig.sh && zkServer.sh start-foreground
+        readinessProbe:
+          exec:
+            command:
+            - "zkOk.sh"
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - "zkOk.sh"
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/zookeeper
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      namespace: ava-prd
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "cephfs"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
