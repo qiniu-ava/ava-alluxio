@@ -1,0 +1,17 @@
+dist: trusty
+sudo: required
+install:
+  - apt update && apt install -y rubygems shellcheck
+  - gem install mdl
+script:
+  - ./tools/scripts/linter.sh
+branches:
+  only:
+  - master
+  - develop
+notifications:
+  recipients:
+    - xiebowen@qiniu.com
+  email:
+    on_success: change
+    on_failure: always

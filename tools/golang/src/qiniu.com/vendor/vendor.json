@@ -3,6 +3,45 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "8991bc29aa16c548c550c7ff78260e27b9ab7c73",
+			"revisionTime": "2018-02-21T22:46:20Z"
+		},
+		{
+			"checksumSHA1": "y2Kh4iPlgCPXSGTCcFpzePYdzzg=",
+			"path": "github.com/eapache/go-resiliency/breaker",
+			"revision": "ea41b0fad31007accc7f806884dcdf3da98b79ce",
+			"revisionTime": "2018-03-26T13:24:23Z"
+		},
+		{
+			"checksumSHA1": "ZoQ02gcdLbrIfDeIXP7AAlHC3+A=",
+			"path": "github.com/eapache/go-xerial-snappy",
+			"revision": "040cc1a32f578808623071247fdbd5cc43f37f5f",
+			"revisionTime": "2018-07-03T13:06:27Z"
+		},
+		{
+			"checksumSHA1": "SJhV59StVXLFvLU0l9s0d00nV10=",
+			"path": "github.com/eapache/queue",
+			"revision": "093482f3f8ce946c05bcba64badd2c82369e084d",
+			"revisionTime": "2018-02-27T14:14:24Z"
+		},
+		{
+			"checksumSHA1": "imR2wF388/0fBU6RRWx8RvTi8Q8=",
+			"path": "github.com/facebookgo/clock",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "bQcY7hcqrWSJix0niSjWzSGeaH4=",
+			"path": "github.com/facebookgo/httpdown",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "P3Gn3pf3toWAIcESbe8N+LuasAA=",
+			"path": "github.com/facebookgo/stats",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "7NP1qUMF8Kx1y0zANxx0e+oq9Oo=",
 			"path": "github.com/fsnotify/fsnotify",
 			"revision": "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9",
@@ -43,6 +82,18 @@
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "14aad3d5ea4c323bcd7a2137e735da24a76e814c",
 			"revisionTime": "2018-07-15T08:23:32Z"
+		},
+		{
+			"checksumSHA1": "h1d2lPZf6j2dW/mIqVnd1RdykDo=",
+			"path": "github.com/golang/snappy",
+			"revision": "2e65f85255dbc3072edf28d6b5b8efc472979f5a",
+			"revisionTime": "2018-05-18T05:39:59Z"
+		},
+		{
+			"checksumSHA1": "QdSIO+gp41BqNti0ZDVdXvfDvDo=",
+			"path": "github.com/gorilla/websocket",
+			"revision": "5ed622c449da6d44c3c8329331ff47a9e5844f71",
+			"revisionTime": "2018-06-05T20:25:52Z"
 		},
 		{
 			"checksumSHA1": "HtpYAWHvd9mq+mHkpo7z8PGzMik=",
@@ -123,6 +174,11 @@
 			"revisionTime": "2018-07-01T07:16:28Z"
 		},
 		{
+			"checksumSHA1": "/DjHHeN6cyb2CNEtKYXO4PgGYeQ=",
+			"path": "github.com/kavu/go_reuseport",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "AYZGozgchqe4WcKH/jCZI1flnP8=",
 			"path": "github.com/magiconair/properties",
 			"revision": "c2353362d570a7bfa228149c62842019201cfb71",
@@ -165,10 +221,124 @@
 			"revisionTime": "2018-03-06T02:43:58Z"
 		},
 		{
+			"checksumSHA1": "WDgX011m3uQMKWf8cHb5Ndyzmj8=",
+			"path": "github.com/pierrec/lz4",
+			"revision": "6b9367c9ff401dbc54fabce3fb8d972e799b702d",
+			"revisionTime": "2018-06-10T16:27:16Z"
+		},
+		{
+			"checksumSHA1": "lpMy6c/DV9QGLA90OluUIjdtTN0=",
+			"path": "github.com/pierrec/lz4/internal/xxh32",
+			"revision": "6b9367c9ff401dbc54fabce3fb8d972e799b702d",
+			"revisionTime": "2018-06-10T16:27:16Z"
+		},
+		{
 			"checksumSHA1": "ljd3FhYRJ91cLZz3wsH9BQQ2JbA=",
 			"path": "github.com/pkg/errors",
 			"revision": "816c9085562cd7ee03e7f8188a1cfd942858cded",
 			"revisionTime": "2018-03-11T21:45:15Z"
+		},
+		{
+			"checksumSHA1": "iUVML8mS1nzCo8Eu/z1FyiVAGHo=",
+			"path": "github.com/qiniu/api.v7",
+			"revision": "fc6ccf58d72e0d93cea4371ba5c97b6adbd0de3f",
+			"revisionTime": "2018-07-15T11:54:20Z"
+		},
+		{
+			"checksumSHA1": "S8HOwhDrcgqDyywBZHDVf0/8j0Q=",
+			"path": "github.com/qiniu/api.v7/auth/qbox",
+			"revision": "fc6ccf58d72e0d93cea4371ba5c97b6adbd0de3f",
+			"revisionTime": "2018-07-15T11:54:20Z"
+		},
+		{
+			"checksumSHA1": "cfTc4oH34GEd6CXeNSzekEPpN7o=",
+			"path": "github.com/qiniu/api.v7/cdn",
+			"revision": "fc6ccf58d72e0d93cea4371ba5c97b6adbd0de3f",
+			"revisionTime": "2018-07-15T11:54:20Z"
+		},
+		{
+			"checksumSHA1": "nUyWDaL427ctaDO2iWjmQrvwwZE=",
+			"path": "github.com/qiniu/api.v7/conf",
+			"revision": "fc6ccf58d72e0d93cea4371ba5c97b6adbd0de3f",
+			"revisionTime": "2018-07-15T11:54:20Z"
+		},
+		{
+			"checksumSHA1": "grkQdwLzJ45fQtpGxqv8Cu0AvGI=",
+			"path": "github.com/qiniu/api.v7/rtc",
+			"revision": "fc6ccf58d72e0d93cea4371ba5c97b6adbd0de3f",
+			"revisionTime": "2018-07-15T11:54:20Z"
+		},
+		{
+			"checksumSHA1": "rEPFhrOO6fijSnSG6NB0cMyh4/A=",
+			"path": "github.com/qiniu/api.v7/storage",
+			"revision": "fc6ccf58d72e0d93cea4371ba5c97b6adbd0de3f",
+			"revisionTime": "2018-07-15T11:54:20Z"
+		},
+		{
+			"checksumSHA1": "EA4uNBPZRo+9leyHHVYetF1j490=",
+			"path": "github.com/qiniu/errors",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "uLXFk9muJtdvpOkyu80kHCOYtcc=",
+			"path": "github.com/qiniu/http/httputil.v1",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "VPjyJL7bmjzMGu5wpzIWEilPA2k=",
+			"path": "github.com/qiniu/log.v1",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "tkqzzvcjrifSldb+iktVkygtWCI=",
+			"path": "github.com/qiniu/rpc.v1",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "JLnC2m9jQZmV8kVAcnWx1qvKqXY=",
+			"path": "github.com/qiniu/rpc.v3",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "beTNGx1rXgzHQQKZzLDl6WJPafg=",
+			"path": "github.com/qiniu/x/bytes.v7",
+			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
+			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
+			"checksumSHA1": "g5gqSqUO071V3ULvUGWT8uaFB8g=",
+			"path": "github.com/qiniu/x/bytes.v7/seekable",
+			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
+			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
+			"checksumSHA1": "nEYHAZwW+PZDXfvtbwJ0ZScoN44=",
+			"path": "github.com/qiniu/x/reqid.v7",
+			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
+			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
+			"checksumSHA1": "OQVghp//ATup7BfCaB1BLjYTJb4=",
+			"path": "github.com/qiniu/x/xlog.v7",
+			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
+			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
+			"checksumSHA1": "2A97Lenjm0jfGd10keWOE5BpHtA=",
+			"path": "github.com/qiniu/xlog.v1",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "an5RM8wjgPPloolUUYkvEncbHu4=",
+			"path": "github.com/rcrowley/go-metrics",
+			"revision": "e2704e165165ec55d062f5919b4b29494e9fa790",
+			"revisionTime": "2018-05-03T17:46:38Z"
+		},
+		{
+			"checksumSHA1": "ze1R6Lrk0kW0cX24ZdZD6ZpIDCo=",
+			"path": "github.com/samuel/go-zookeeper/zk",
+			"revision": "c4fab1ac1bec58281ad0667dc3f0907a9476ac47",
+			"revisionTime": "2018-01-30T19:37:22Z"
 		},
 		{
 			"checksumSHA1": "IU0RLDrXScjlsTwNWAKQLLsLoc0=",
@@ -243,6 +413,12 @@
 			"revisionTime": "2018-06-20T09:14:27Z"
 		},
 		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "d0887baf81f4598189d4e12a37c6da86f0bba4d0",
+			"revisionTime": "2018-07-12T19:54:13Z"
+		},
+		{
 			"checksumSHA1": "e66DmNWQKgI97tvj4BH7rHYnyJs=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "7138fd3d9dc8335c567ca206f4333fb75eb05d56",
@@ -265,6 +441,12 @@
 			"path": "golang.org/x/text/unicode/norm",
 			"revision": "c0fe8dde8a10c9b32154bd9bdf080b8b3d635127",
 			"revisionTime": "2018-06-28T04:21:03Z"
+		},
+		{
+			"checksumSHA1": "IkfAEoPFjLQPkY36XXIAv+4Wf8Y=",
+			"path": "gopkg.in/Shopify/sarama.v1",
+			"revision": "35324cf48e33d8260e1c7c18854465a904ade249",
+			"revisionTime": "2018-05-30T15:11:20Z"
 		},
 		{
 			"checksumSHA1": "P/k5ZGf0lEBgpKgkwy++F7K1PSg=",
@@ -309,6 +491,17 @@
 			"revisionTime": "2018-03-28T19:50:20Z"
 		},
 		{
+			"checksumSHA1": "yD0qhKVSSaYIcSU34UgfqY4/9PU=",
+			"path": "qiniupkg.com/trace.v1",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "9t2exgz3OI0iupx2XzTY64dTNTI=",
+			"path": "qiniupkg.com/x/bytes.v7",
+			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
+			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
 			"checksumSHA1": "iEbAwXPUTuF9nxvb+uURCIfbsvM=",
 			"path": "qiniupkg.com/x/config.v7",
 			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
@@ -319,6 +512,17 @@
 			"path": "qiniupkg.com/x/log.v7",
 			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
 			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
+			"checksumSHA1": "H8+RHqplH5pNwKVURcANz3Z7+8Y=",
+			"path": "qiniupkg.com/x/reqid.v7",
+			"revision": "946c4a16076d6d98aeb78619e2bd4012357f7228",
+			"revisionTime": "2015-07-21T03:42:11Z"
+		},
+		{
+			"checksumSHA1": "JC/hc2Trmycx7jG7WVTis8ly5W4=",
+			"path": "qiniupkg.com/x/rollog.v1",
+			"revision": ""
 		}
 	],
 	"rootPath": "qiniu.com"

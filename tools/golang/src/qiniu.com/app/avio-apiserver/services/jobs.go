@@ -84,7 +84,11 @@ func (j *JobService) ListJobs(c *gin.Context) {
 		return
 	}
 
-	query := &database.ListJobQuery{limit, skip, uid}
+	query := &database.ListJobQuery{
+		Limit: limit,
+		Skip:  skip,
+		UID:   uid,
+	}
 
 	result := &database.ListJobResult{}
 

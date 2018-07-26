@@ -132,6 +132,21 @@ hash=`git rev-parse --short=7 HEAD` && tar zcvf alluxio-1.7.2-${hash}.tar.gz ./a
 
 关于 ./tools/scrips/build-alluxio.sh 脚本更多的使用细则，请查看脚本中的 usage 说明。
 
+若要生成在 kubernetes 集群中部署的 client 则需要使用最新 tag 的代码来生成压缩包，且以 tag 命名压缩包，如:
+
+```shell
+
+git tag ava-alluxio-<version>             # 先确保代码已全都合并到 qiniu-ava/alluxio 中
+git push upstream --tags                  # 确保对应的 tag 推送到了 qiniu-ava/alluxio 源中
+git checkout ava-alluxio-<version>
+./tools/scripts/build-alluxio.sh
+cd .tmp/alluxio
+tar_name=`git describe --exact-match --tags $(git rev-parse --short=7 HEAD)` \
+  && tar zcvf ${tar_name}.tar.gz ./alluxio-1.7.2-SNAPSHOT \
+  && qrsctl put bowen tmp/${tar_name}.tar.gz ./${tar_name}.tar.gz
+
+```
+
 ### 生成 alluxio 镜像
 
 1. 在本地登录 reg-xs.qiniu.io registry

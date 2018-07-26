@@ -28,8 +28,6 @@ kafka:
 
 zookeeper:
 	cd docker/app/zookeeper && docker build -t reg-xs.qiniu.io/atlab/avio-zookeeper .
-	
-
 
 tools:
 	@echo TODO && exit 1
