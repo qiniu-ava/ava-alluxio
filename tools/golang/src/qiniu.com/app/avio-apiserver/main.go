@@ -8,6 +8,7 @@ import (
 	db "qiniu.com/app/avio-apiserver/database"
 	"qiniu.com/app/avio-apiserver/utils"
 	"qiniupkg.com/x/config.v7"
+	log "qiniupkg.com/x/log.v7"
 )
 
 const defaultConfig = `{
@@ -44,11 +45,12 @@ func main() {
 	db.Init()
 
 	server := &http.Server{
-		Addr:         ":8080",
+		Addr:         ":8090",
 		Handler:      initRouter(),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
+	log.Infof("listening 8090...")
 	server.ListenAndServe()
 }

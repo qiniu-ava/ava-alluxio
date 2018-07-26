@@ -28,7 +28,7 @@ func NewMongoSession(conf *utils.Config) (session *mgo.Session, e error) {
 
 func Init() (e error) {
 	Daos = &daos{}
-	j, e := NewJobDao()
+	j, e := NewJobDao(db)
 	Daos.Job = j
 	if e != nil {
 		log.Warn("init job collection failed")

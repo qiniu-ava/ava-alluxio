@@ -35,9 +35,13 @@ type jobDao struct {
 	collection *mgo.Collection
 }
 
-func NewJobDao() (d *jobDao, e error) {
+func NewJobDao(db *mgo.Database) (d *jobDao, e error) {
+	c := db.C(jobCollectionName)
+	if e := c.EnsureIndex(mgo.Index{Key: []string{"name"}, Unique: true, Name: "job_name"}); e != nil {
+		return nil, e
+	}
 	d = &jobDao{
-		collection: db.C(jobCollectionName),
+		collection: c,
 	}
 	if e := d.collection.EnsureIndex(mgo.Index{Key: []string{"name"}, Unique: true, Name: "job_name"}); e != nil {
 		return nil, e
