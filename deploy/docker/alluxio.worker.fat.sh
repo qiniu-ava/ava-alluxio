@@ -12,8 +12,8 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  container_mem_size=20g
-  worker_mem_size=16G
+  container_mem_size=40g
+  worker_mem_size=20G
   ram_tier_size=20G
   if [ ! -d /mnt/ramdisk ]; then
     sudo mkdir -p /mnt/ramdisk

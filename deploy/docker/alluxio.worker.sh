@@ -12,8 +12,8 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  container_mem_size=30g # worker 容器运行时申请的内存上线
-  worker_mem_size=25G # worker 进程运行时占用的内存大小
+  container_mem_size=130g # worker 容器运行时申请的内存上线
+  worker_mem_size=100G
   ram_tier_size=100G
   if [ ! -d /mnt/ramdisk ]; then
     sudo mkdir -p /mnt/ramdisk

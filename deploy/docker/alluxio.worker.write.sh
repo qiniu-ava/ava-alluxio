@@ -13,7 +13,6 @@ myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{p
 
 start() {
   container_mem_size=16g
-  worker_mem_size=8G
 
   mkdir -p /alluxio-share/alluxio/workers/${myip}/tmp
   mkdir -p /alluxio-share/alluxio/workers/${myip}/cachedisk
@@ -27,14 +26,12 @@ start() {
     -m ${container_mem_size} \
     -e ALLUXIO_JAVA_OPTS="-Xms8g -Xmx8g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
-    -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_PORT=${ALLUXIO_WRITE_WORKER_PORT} \
     -e ALLUXIO_WORKER_DATA_PORT=${ALLUXIO_WRITE_WORKER_DATA_PORT} \
     -e ALLUXIO_WORKER_WEB_PORT=${ALLUXIO_WRITE_WORKER_WEB_PORT} \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
     -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
     -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
-    -e ALLUXIO_WORKER_MEMORY_SIZE=${worker_mem_size} \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=1 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=SSD \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/cachedisk \
