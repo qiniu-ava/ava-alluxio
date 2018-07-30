@@ -12,7 +12,15 @@ fi
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
 
 start() {
-  container_mem_size=16g
+  container_mem_size=20g
+  worker_mem_size=4G
+  ram_tier_size=4G
+  if [ ! -d /mnt/ramdisk-writer ]; then
+    sudo mkdir -p /mnt/ramdisk-writer
+    sudo mount -t ramfs -o size=${ram_tier_size} ramfs /mnt/ramdisk-writer
+    sudo chmod a+w /mnt/ramdisk-writer
+    mkdir -p /mnt/ramdisk-writer/data
+  fi
 
   mkdir -p /alluxio-share/alluxio/workers/${myip}/tmp
   mkdir -p /alluxio-share/alluxio/workers/${myip}/cachedisk
@@ -26,18 +34,25 @@ start() {
     -m ${container_mem_size} \
     -e ALLUXIO_JAVA_OPTS="-Xms8g -Xmx8g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
+    -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_PORT=${ALLUXIO_WRITE_WORKER_PORT} \
     -e ALLUXIO_WORKER_DATA_PORT=${ALLUXIO_WRITE_WORKER_DATA_PORT} \
     -e ALLUXIO_WORKER_WEB_PORT=${ALLUXIO_WRITE_WORKER_WEB_PORT} \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
     -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
     -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=1 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=SSD \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/cachedisk \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=4TB \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.01 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.002 \
+    -e ALLUXIO_WORKER_MEMORY_SIZE=${worker_mem_size} \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=2 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/ramdisk \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=${ram_tier_size} \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.8 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.6 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=4TB \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.01 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.002 \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_ENABLED=true \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_INTERVAL=10000 \
     -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=1024 \
@@ -52,6 +67,7 @@ start() {
     -p ${ALLUXIO_WRITE_WORKER_PORT}:${ALLUXIO_WRITE_WORKER_PORT} \
     -p ${ALLUXIO_WRITE_WORKER_DATA_PORT}:${ALLUXIO_WRITE_WORKER_DATA_PORT} \
     -p ${ALLUXIO_WRITE_WORKER_WEB_PORT}:${ALLUXIO_WRITE_WORKER_WEB_PORT} \
+    -v /mnt/ramdisk-writer:/opt/ramdisk \
     -v /alluxio-share/alluxio/workers/${myip}/tmp:/tmp \
     -v /alluxio-share/alluxio/workers/${myip}/cachedisk:/opt/cachedisk \
     -v /alluxio-share/alluxio/workers/${myip}/underStorage:/underStorage \
