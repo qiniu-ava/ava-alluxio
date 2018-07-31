@@ -12,7 +12,8 @@
 
 ``` shell
 
-docker-compose up -d
+cd <path_to_hack_mq>
+./run.sh
 
 ```
 
@@ -20,6 +21,7 @@ docker-compose up -d
 
 ``` shell
 
+cd <path_to_hack_mq>
 docker-compose stop
 
 ```

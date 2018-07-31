@@ -1,0 +1,16 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "<ZOOKEEPER_PORT>:<ZOOKEEPER_PORT>"
+  kafka:
+    build: .
+    ports:
+      - "<KAFKA_PORT>:<KAFKA_PORT>"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: <HOST_NAME>
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:<ZOOKEEPER_PORT>
+      KAFKA_CREATE_TOPICS: "avio_job_item_prd:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

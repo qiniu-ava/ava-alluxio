@@ -29,3 +29,8 @@ tools/golang/bin
 tools/golang/pkg
 tools/golang/.cache
 
+
+# hack
+hack/alluxio/env
+hack/mq/docker-compose.yml
+hack/mq/env
