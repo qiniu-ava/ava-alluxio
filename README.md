@@ -3,6 +3,8 @@
 - [ava-alluxio](#ava-alluxio)
   - [前置文档](#%E5%89%8D%E7%BD%AE%E6%96%87%E6%A1%A3)
   - [本地开发](#%E6%9C%AC%E5%9C%B0%E5%BC%80%E5%8F%91)
+    - [avio server](#avio-server)
+    - [avio](#avio)
   - [部署](#%E9%83%A8%E7%BD%B2)
     - [前置条件](#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6)
     - [部署 zookeeper](#%E9%83%A8%E7%BD%B2-zookeeper)
@@ -28,6 +30,35 @@
 - [`fuse`](https://github.com/libfuse/libfuse/tree/master/doc)
 
 ## 本地开发
+
+### avio server
+
+avio server 包括[多个模块](./docs/avio-server.md)，要在本地开发时正常使用这些模块，需要一次运行如下的脚本:
+
+- 配置 `./hack/mq/env` 文件(参照 `./hack/mq/env.template` )，启动 kafka:
+
+``` shell
+cd ./hack/mq
+./run.sh # 注意，为了方便 docker-compose 正常启动，请在此脚本所在路径下运行
+```
+
+- 配置 `./hack/alluxio/env` 文件(参照 `./hack/mq/env.template` )，启动 alluxio 的 master、worker、proxy
+
+``` shell
+./hack/alluxio/master.sh
+./hack/alluxio/worker.sh
+./hack/alluxio/proxy.sh
+```
+
+- 分别启动 avio-apiserver/avio-executor/avio-walker 模块
+
+```shell
+./hack/avio/run.sh apiserver # 终端1
+./hack/avio/run.sh executor # 终端2
+./hack/avio/run.sh walker # 终端3
+```
+
+### avio
 
 @TODO
 
