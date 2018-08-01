@@ -1,7 +1,12 @@
 dist: trusty
 sudo: required
-install:
-  - apt update && apt install -y rubygems shellcheck
+language: ruby
+rvm:
+  - 2.2
+git:
+  submodules: false
+before_install:
+  - sudo apt update && sudo apt install -y shellcheck
   - gem install mdl
 script:
   - ./tools/scripts/linter.sh
