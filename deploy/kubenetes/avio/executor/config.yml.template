@@ -1,0 +1,37 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: avio-executor
+  namespace: ava-prd
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: avio-executor
+        namespace: ava-prd
+    spec:
+      imagePullSecrets:
+      - name: atlab-images
+      containers:
+      - name: avio-executor
+        imagePullPolicy: Always
+        image: reg-xs.qiniu.io/atlab/avio-executor:<REPOS_TAG>
+        command:
+        - /opt/avio-executor
+        - -f
+        - /opt/config/avio-executor.conf
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: 500m
+          limit:
+            memory: "1Gi"
+            cpu: 1500m
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/config
+    volumes:
+      - name: config-volume
+        configMap:
+          name: avio-executor-config

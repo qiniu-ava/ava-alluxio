@@ -1,0 +1,71 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: avio-apiserver
+  namespace: ava-prd
+spec:
+  rules:
+  - host: "avio-apiserver.ava.ke-xs.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: avio-apiserver
+          servicePort: <APISERVER_PORT>
+        path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avio-apiserver
+  namespace: ava-prd
+  labels:
+    app: avio-apiserver
+spec:
+  ports:
+  - port: <APISERVER_PORT>
+    name: server
+  clusterIP: None
+  selector:
+    app: avio-apiserver
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: avio-apiserver
+  namespace: ava-prd
+spec:
+  serviceName: avio-apiserver-svc
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: avio-apiserver
+        namespace: ava-prd
+    spec:
+      imagePullSecrets:
+      - name: atlab-images
+      containers:
+      - name: avio-apiserver
+        imagePullPolicy: Always
+        image: reg-xs.qiniu.io/atlab/avio-apiserver:<REPOS_TAG>
+        command:
+        - /opt/avio-apiserver
+        - -f
+        - /opt/config/avio-apiserver.conf
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: 500m
+          limit:
+            memory: "1Gi"
+            cpu: 1500m
+        ports:
+        - containerPort: <APISERVER_PORT>
+          name: server
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/config
+    volumes:
+      - name: config-volume
+        configMap:
+          name: avio-apiserver-config
