@@ -34,3 +34,6 @@ tools/golang/.cache
 hack/alluxio/env
 hack/mq/docker-compose.yml
 hack/mq/env
+
+# Python
+*.pyc
