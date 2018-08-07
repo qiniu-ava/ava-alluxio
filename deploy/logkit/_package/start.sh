@@ -22,7 +22,7 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $DIR
+cd "$DIR"
 
 AK=""
 SK=""
@@ -41,8 +41,8 @@ for i in "$@"; do
     ;;
     --aksk=*)
 	  akskFile="${i#*=}"
-      AK="$(sed -n 's/'$service_mail'_AK=//gp' $akskFile)"
-      SK="$(sed -n 's/'$service_mail'_SK=//gp' $akskFile)"
+      AK="$(sed -n 's/'"$service_mail"'_AK=//gp' "$akskFile")"
+      SK="$(sed -n 's/'"$service_mail"'_SK=//gp' "$akskFile")"
     ;;
     *)
       # unknown option
@@ -50,16 +50,21 @@ for i in "$@"; do
   esac
 done
 
-if [ "$AK" != "" -a "$SK" != "" ]; then
-  for file in $DIR/confs/* ; do
-    temp_file=`basename $file`
-    sed -i 's/\"pandora_ak\": <pandora_ak>/\"pandora_ak\": '$AK'/' $DIR/confs/$temp_file
-    sed -i 's/\"pandora_sk\": <pandora_sk>/\"pandora_sk\": '$SK'/' $DIR/confs/$temp_file
+if  [ "$AK" != "" ] && [ "$SK" != "" ]; then
+  for file in "$DIR"/confs/* ; do
+    temp_file=$(basename "$file")
+    sed -i 's/\"pandora_ak\": <pandora_ak>/\"pandora_ak\": \"'"$AK"'\"/' "$DIR"/confs/"$temp_file"
+    sed -i 's/\"pandora_sk\": <pandora_sk>/\"pandora_sk\": \"'"$SK"'\"/' "$DIR"/confs/"$temp_file"
   done
-  logkitPID="$(ps -aux | grep "logkit" | grep -v grep | awk '{print $2}')"
+  nowdate="$(date --rfc-3339=ns | sed 's/ /T/; s/+.*/Z')"
+  for file in "$DIR"/script/* ; do
+    temp_file=$(basename "$file")
+    sed -i "1,3s/.*#SAVE_TIME/logTime=${nowdate} #SAVE_TIME/" "$DIR"/script/"$temp_file"
+  done
+  logkitPID="$(pgrep logkit)"
   if [ "$logkitPID" != "" ]; then
     for i in $logkitPID; do
-      kill -9 $logkitPID
+      kill -9 "$logkitPID"
     done
   fi
   nohup ./logkit -f logkit.conf > ../logkit.out 2>&1 &
