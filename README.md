@@ -10,6 +10,13 @@
     - [部署 zookeeper](#%E9%83%A8%E7%BD%B2-zookeeper)
     - [部署 master](#%E9%83%A8%E7%BD%B2-master)
     - [部署 worker](#%E9%83%A8%E7%BD%B2-worker)
+    - [部署 logkit](#%E9%83%A8%E7%BD%B2-logkit)
+      - [logkit config](#logkit-config)
+      - [pandora log download](#pandora-log-download)
+    - [部署 cadvisor](#%E9%83%A8%E7%BD%B2-cadvisor)
+    - [部署 node-export](#%E9%83%A8%E7%BD%B2-node-export)
+    - [配置 ava-prometheus](#配置-ava-prometheus)
+    - [部署 grafana](#%E9%83%A8%E7%BD%B2-grafana)
   - [工具](#%E5%B7%A5%E5%85%B7)
     - [生成 alluxio 包](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)
     - [生成 alluxio 镜像](#%E7%94%9F%E6%88%90-alluxio-%E9%95%9C%E5%83%8F)
@@ -144,6 +151,136 @@ git pull
 ```
 
 5. 依照[下述方式](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)生成 alluxio 包，创建 Jira issue 给 Kirk 组相关同学帮忙更新 k8s 集群中各节点上的 alluxio worker 实例。
+
+### 部署 logkit
+
+logkit 部署执行步骤如下：
+
+1. 同部署 zookeeper 中的 *1*
+
+2. 进入 deploy 相关目录，并更新最新代码
+
+```shell
+cd /alluxio-share/workspace/repos/ava-alluxio/deploy/logkit
+git pull
+```
+
+3. 在 jq13 ~ 17, jq19 ~ 21 上，执行 logkit 的初始化脚本logkit_init.sh
+
+```shell
+./logkit_init.sh
+```
+
+4. 在 jq13 ~ 17, jq19 ~ 21 上，执行 logkit 的启动脚本start.sh, 启动时需要手动提供有pandora服务AKSK或提供aksk文件路径(文件内容格式见start.sh中的usage帮助)和账号名
+
+```shell
+cd ~/logkit/_package
+./start.sh --ak=AK --sk=SK or ./start.sh --aksk=AKSKFilePath --mail=MAIL
+```
+
+5. 查看logkit日志, 验证服务运行是否成功。日志文件路径在 `logkit.conf` 文件中的 `log` 路径下。
+
+#### logkit config
+
+推荐配置姿势:
+
+1. 本机运行命令
+
+```shell
+wget https://pandora-dl.qiniu.com/logkit_mac_${LOGKIT_VERSION}.tar.gz && tar xvf logkit_mac_${LOGKIT_VERSION}.tar.gz && rm logkit_mac_${LOGKIT_VERSION}.tar.gz
+cd _package_mac/
+```
+
+2. 查看logkit.conf中的bind_host
+
+3. 本机运行logkit:
+
+```shell
+./logkit -f logkit.conf
+```
+
+4. 本机浏览器进入第二步中的bind_host
+
+5. 点击添加日志收集, 按照网页前端提示, 完成配置, 并以该配置作为模版
+
+6. 根据模版配置以及配置说明进一步定制化, 配置文档：[logkit 配置文档](https://github.com/qiniu/logkit/wiki/logkit%E4%B8%BB%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
+
+#### pandora log download
+
+使用方式:
+
+1. 运行logDownload.py
+
+```shell
+cd <logkit path>/pandora/
+python logDownload.py
+```
+
+2. 根据提示输入pandora日志仓库名称, AK, SK, from, scroll。`from`是一个`int`值，表示从第几条日志开始下载; `scroll`是一个时间段，可输入的字符串如 `10s, 20m, 1h`。经测试 `from` 和 `scroll` 属性在该API中无效, 已经向pandora反馈.
+
+3. 输入完成后, 开始下载, 下载时若没有错误会在屏幕打印下载次数和返回的`scroll_id`, 最后一次下载完会打印`readLog Success`表示下载成功; 若下载过程中出错, 会打印出错信息, 并提示`readLog Fail`.
+
+### 部署 cadvisor
+
+在 jq13 ~ 17, jq19 ~ 21 上, 执行以下命令:
+
+```shell
+cd /alluxio-share/workspace/repos/prometheus/
+./cadvisor.sh start/restart
+```
+
+### 部署 node-export
+
+在 jq13 ~ 17, jq19 ~ 21 上, 执行以下命令:
+
+```shell
+cd /alluxio-share/workspace/repos/prometheus/
+./node-export.sh start/restart
+```
+
+@TODO:
+
+  1. 利用textfile collect采集更多信息，如文件夹大小、master状态
+
+### 配置 ava-prometheus
+
+参考文档: [ServiceMoniter 监控配置参考文档](https://cf.qiniu.io/pages/viewpage.action?pageId=37716151)
+
+补充:
+
+1. 对于不在k8s集群中的机器，需要使用`Endpoints + Service`来表示`metric`获取源。另外, `ServiceMoniter`中的`endpoints label`需要与`endpoints.yml`中的`ports label`一一对应
+
+2. `ServiceMonitor` 可以选多个 `Service`，通过一个共同的 `label` 就可以了，实际抓取的是 `Service` 后面对应的 `Endpoints`
+
+### 部署 grafana
+
+前提条件：
+
+1. 已有的 `prometheus` 数据源, 或其他grafana可用的数据源
+
+部署步骤：
+
+1. 编写k8s中grafana服务所需的配置文件，可参考[ava-dashboard的配置文件](https://gitlab.qiniu.io/ava/ava-deploy/tree/master/apps/ava-dashboard), `configmap` 中 `datasource.ymal` 中 `url` 为数据源的 `url` , `configmap` 中 `grafana.ini` 需要加入 `email` 报警所需的 `[smtp]` 配置, 配置属性如下:
+
+```ini
+[smtp]
+enabled = true
+host = smtpHost:port
+user = XXX@XXX.com
+password = XXXXXXX
+from_address = xuerui@qiniu.com
+skip_verify = true
+```
+
+2. 将 `service.ymal, ingress.ymal, configmap.ymal, deployment.ymal` 放入同一个文件夹下, 文件夹路径为 `<directory path>`
+
+3. 用 `kubectl` 命令连接到 `xs` 或 `jq` 集群, 然后运行命令:
+
+```shell
+kubectl create -f <directory path> # <directory path>为上一步创建的文件夹
+```
+
+4. 在浏览器中打开 `ingress.ymal` 中 `host` 路径，验证服务启动成功。
 
 ## 工具
 
