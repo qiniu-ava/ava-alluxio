@@ -32,6 +32,7 @@ start() {
   docker run -d \
     --name alluxio-worker \
     --hostname ${myip} \
+    --network host \
     -m ${container_mem_size} \
     -e ALLUXIO_JAVA_OPTS="-Xms8g -Xmx8g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
@@ -67,9 +68,6 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
-    -p 29998:29998 \
-    -p 29999:29999 \
-    -p 30000:30000 \
     -v /mnt/ramdisk:/opt/ramdisk \
     -v /disk1/alluxio/data/cachedisk:/opt/cachedisk1 \
     -v /disk2/alluxio/data/cachedisk:/opt/cachedisk2 \
