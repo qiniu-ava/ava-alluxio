@@ -22,12 +22,10 @@ cp ${DIR}/zookeeper/log4j.properties /alluxio-share/zookeeper/$myip/config
 
 docker rm -f alluxio-zk
 docker run -d \
+  --network host \
   --name alluxio-zk \
   -e ZOO_MY_ID=${myid} \
   -e ZOO_SERVERS=${zoo_servers} \
-  -p 2888:2888 \
-  -p 3888:3888 \
-  -p 2181:2181 \
   -v /alluxio-share/zookeeper/$myip/config:/conf \
   -v /alluxio-share/zookeeper/$myip/data:/data \
   -v /alluxio-share/zookeeper/$myip/log:/datalog \

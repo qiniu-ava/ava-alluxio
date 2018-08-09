@@ -31,6 +31,7 @@ start() {
   docker run -d \
     --name alluxio-worker-writer \
     --hostname ${myip} \
+    --network host \
     -m ${container_mem_size} \
     -e ALLUXIO_JAVA_OPTS="-Xms8g -Xmx8g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
@@ -51,8 +52,8 @@ start() {
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=4TB \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.01 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.002 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.1 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.05 \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_ENABLED=true \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_INTERVAL=10000 \
     -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=1024 \
@@ -64,9 +65,6 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
-    -p ${ALLUXIO_WRITE_WORKER_PORT}:${ALLUXIO_WRITE_WORKER_PORT} \
-    -p ${ALLUXIO_WRITE_WORKER_DATA_PORT}:${ALLUXIO_WRITE_WORKER_DATA_PORT} \
-    -p ${ALLUXIO_WRITE_WORKER_WEB_PORT}:${ALLUXIO_WRITE_WORKER_WEB_PORT} \
     -v /mnt/ramdisk-writer:/opt/ramdisk \
     -v /alluxio-share/alluxio/workers/${myip}/tmp:/tmp \
     -v /alluxio-share/alluxio/workers/${myip}/cachedisk:/opt/cachedisk \

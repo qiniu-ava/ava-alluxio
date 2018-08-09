@@ -21,6 +21,7 @@ start() {
   docker run -d \
     --name alluxio-master \
     --hostname $myip \
+    --network host \
     -m ${container_mem_size} \
     -e ALLUXIO_JAVA_OPTS="-Xms64g -Xmx64g -Xss4m" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
@@ -32,8 +33,6 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
-    -p 19998:19998 \
-    -p 19999:19999 \
     -v /alluxio-share/alluxio/journal/:/journal \
     -v /alluxio-share/alluxio/underStorage/:/underStorage \
     --restart=always \
