@@ -18,13 +18,17 @@ start() {
     -e ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS=256 \
     -e ALLUXIO_USER_FILE_MASTER_CLIENT_THREADS=156 \
     -e ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=8192 \
+    -e ALLUXIO_USER_FILE_WRITE_TIER_DEFAULT=1 \
+    -e ALLUXIO_USER_FILE_WRITETYPE_DEFAULT=ASYNC_THROUGH \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
-    -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
+    -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
+    -e QINIU_WRITER_HOSTS="192.168.213.50:29899,192.168.213.51:29899,192.168.213.52:29899" \
+    -e QINIU_READER_EX_HOSTS="192.168.213.50:29899,192.168.213.51:29899,192.168.213.52:29899" \
     alluxio \
-    client
+    proxy
 }
 
 remove() {

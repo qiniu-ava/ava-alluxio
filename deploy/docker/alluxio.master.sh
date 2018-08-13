@@ -17,7 +17,7 @@ start() {
   # 另加上最多 2048 个线程，每个线程 4m 的栈，master 进程最多可占
   # 用 72g 内存
   container_mem_size=75g
-  myip=`ifconfig | grep 'inet addr:192.168.212' | awk -F':' '{print $2}' | awk '{print $1}'`
+  myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
   docker run -d \
     --name alluxio-master \
     --hostname $myip \
@@ -30,7 +30,7 @@ start() {
     -e ALLUXIO_MASTER_WORKER_TIMEOUT=15min \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
-    -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181 \
+    -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
     -v /alluxio-share/alluxio/journal/:/journal \
