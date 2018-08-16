@@ -21,8 +21,7 @@ port=$( jq ".port" walker.conf )
 tag=$(git rev-parse --short=7 HEAD)
 sed "s/<WALKER_PORT>/${port}/g" config.yml.template | sed "s/<REPOS_TAG>/${tag}/g" > config.yml
 
-kubectl delete configmap -n ava-prd avio-walker-config
-kubectl create configmap -n ava-prd avio-walker-config --from-file=walker.conf
-kubectl create -f ./test.yml
+kubectl delete configmap avio-walker-config
+kubectl create configmap avio-walker-config --from-file=walker.conf
 
 cd "$oldDir" || return

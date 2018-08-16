@@ -8,8 +8,9 @@ printUsage() {
 }
 
 launch() {
+  cd "$DIR/../../tools/golang/src/qiniu.com/app" || exit
+  env GOOS=darwin go install -tags debug ./...
   cd "$DIR/../.." || exit
-  make tools-golang-macos
 
   if [ "$1" == all ];then
     killall avio-apiserver

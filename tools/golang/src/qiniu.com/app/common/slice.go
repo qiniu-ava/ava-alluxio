@@ -48,3 +48,18 @@ func Map(vs []string, f func(string) string) []string {
 	}
 	return vsm
 }
+
+func Max(vi []int) int {
+	if len(vi) == 0 {
+		return 0
+	}
+
+	a := vi[0]
+	for _, v := range vi {
+		if v > a {
+			a = v
+		}
+	}
+
+	return a
+}

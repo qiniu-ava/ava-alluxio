@@ -1,22 +1,28 @@
 package services
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"qiniu.com/app/avio-apiserver/database"
-	"qiniu.com/app/avio-apiserver/typo"
+	"qiniu.com/app/avio-apiserver/utils"
+	"qiniu.com/app/common/database"
+	"qiniu.com/app/common/typo"
 	log "qiniupkg.com/x/log.v7"
 )
 
 type JobService struct {
-	dao database.JobDao
+	client http.Client
 }
 
 func NewJobService() *JobService {
 	return &JobService{
-		dao: database.Daos.Job,
+		client: http.Client{
+			Timeout: time.Duration(60 * time.Second),
+		},
 	}
 }
 
@@ -40,7 +46,7 @@ func (j *JobService) CreateJob(c *gin.Context) {
 		return
 	}
 
-	info, e := j.dao.InsertJob(job)
+	info, e := database.Daos.Job.InsertJob(job)
 
 	if e != nil {
 		log.Warnf("insert job error: %v", e)
@@ -56,8 +62,84 @@ func (j *JobService) CreateJob(c *gin.Context) {
 	})
 }
 
-func (j *JobService) ListJobs(c *gin.Context) {
+func (j *JobService) StartJob(c *gin.Context) {
+	jobName := c.Param("name")
+	u := c.GetHeader("X-UID")
+	uid, e := strconv.ParseInt(u, 10, 64)
+	if e != nil {
+		log.Warnf("uid string2int error : ", e)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": e,
+		})
+		return
+	}
 
+	job, e := database.Daos.Job.GetJobInfo(jobName, uid)
+	if e != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": fmt.Sprintf("获取任务信息失败"),
+		})
+		return
+	}
+
+	if job.Status != typo.CreatedJobStatus && job.Status != typo.FailedJobStatus {
+		c.JSON(http.StatusForbidden, gin.H{
+			"err": fmt.Sprintf("当前任务状态不允许再次启动"),
+		})
+		return
+	}
+
+	w, e := database.Daos.Walker.GetWalkers()
+	if e != nil || len(w) == 0 {
+		log.Warnf("no active walker available now")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": fmt.Sprintf("后台服务器暂时不可用，请稍后再试"),
+		})
+	}
+
+	walkerName := utils.PickWalker(w)
+
+	req := http.Request{
+		URL: &url.URL{
+			Host:   walkerName,
+			Scheme: "http",
+			Path:   "/jobs/" + jobName + "/start",
+		},
+		Method: "POST",
+		Header: http.Header{
+			"X-UID": []string{fmt.Sprintf("%d", uid)},
+		},
+	}
+
+	timesToRetry := 3
+retry:
+	res, e := j.client.Do(&req)
+	if e != nil {
+		if timesToRetry > 0 {
+			timesToRetry--
+			log.Errorf("start job %s on walk server %s failed after %d retries, error: %v", jobName, walkerName, 3-timesToRetry, e)
+			goto retry
+		} else {
+			log.Errorf("start job %s on walk server %s failed after %d retries, error: %v", jobName, walkerName, 3-timesToRetry, e)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"err": e,
+			})
+			return
+		}
+	}
+
+	if res.StatusCode-res.StatusCode%100 != 200 {
+		log.Errorf("start job %s on walk server %s failed, status code: %d", jobName, walkerName, res.StatusCode)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": fmt.Sprintf("服务器错误，错误码%d", res.StatusCode),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (j *JobService) ListJobs(c *gin.Context) {
 	limit, e := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	if e != nil {
 		log.Warnf("limit string2int error : ", e)
@@ -75,7 +157,7 @@ func (j *JobService) ListJobs(c *gin.Context) {
 		})
 		return
 	}
-	uid, e := strconv.Atoi(c.Query("uid"))
+	uid, e := strconv.ParseInt(c.Query("uid"), 10, 64)
 	if e != nil {
 		log.Warnf("uid string2int error : ", e)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -84,15 +166,15 @@ func (j *JobService) ListJobs(c *gin.Context) {
 		return
 	}
 
-	query := &database.ListJobQuery{
+	query := &typo.ListJobQuery{
 		Limit: limit,
 		Skip:  skip,
 		UID:   uid,
 	}
 
-	result := &database.ListJobResult{}
+	result := &typo.ListJobResult{}
 
-	if e := j.dao.ListJob(result, query); e != nil {
+	if e := database.Daos.Job.ListJob(result, query); e != nil {
 		log.Warnf("list jobs error: %v", e)
 		c.JSON(http.StatusNotImplemented, gin.H{
 			"err": e,
@@ -107,7 +189,7 @@ func (j *JobService) ListJobs(c *gin.Context) {
 			"uid":   query.UID,
 		},
 		"total": result.Total,
-		"item":  result.Items,
+		"items": result.Items,
 	})
 
 }
@@ -121,7 +203,7 @@ func (j *JobService) GetJobInfo(c *gin.Context) {
 		})
 		return
 	}
-	uid, e := strconv.Atoi(headUID)
+	uid, e := strconv.ParseInt(headUID, 10, 64)
 	if e != nil {
 		log.Warnf("uid string2int error : ", e)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -136,7 +218,7 @@ func (j *JobService) GetJobInfo(c *gin.Context) {
 		})
 		return
 	}
-	info, e := j.dao.GetJobInfo(jobName, uid)
+	info, e := database.Daos.Job.GetJobInfo(jobName, uid)
 	if e != nil {
 		log.Warnf("get job info error: %v", e)
 		c.JSON(http.StatusNotImplemented, gin.H{
@@ -157,7 +239,7 @@ func (j *JobService) UpdateJobInfo(c *gin.Context) {
 		})
 		return
 	}
-	uid, e := strconv.Atoi(headUID)
+	uid, e := strconv.ParseInt(headUID, 10, 64)
 	if e != nil {
 		log.Warnf("uid string2int error : ", e)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -185,7 +267,7 @@ func (j *JobService) UpdateJobInfo(c *gin.Context) {
 		return
 	}
 
-	updatedInfo, e := j.dao.UpdateJobInfo(jobName, uid, jobInfo)
+	updatedInfo, e := database.Daos.Job.UpdateJobInfo(jobName, uid, jobInfo)
 
 	if e != nil {
 		log.Warnf("update job error: %v", e)
@@ -207,7 +289,7 @@ func (j *JobService) DeleteJobInfo(c *gin.Context) {
 		})
 		return
 	}
-	uid, e := strconv.Atoi(headUID)
+	uid, e := strconv.ParseInt(headUID, 10, 64)
 	if e != nil {
 		log.Warnf("uid string2int error : ", e)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -215,7 +297,7 @@ func (j *JobService) DeleteJobInfo(c *gin.Context) {
 		})
 		return
 	}
-	if e := j.dao.DeleteJobInfo(jobName, uid); e != nil {
+	if e := database.Daos.Job.DeleteJobInfo(jobName, uid); e != nil {
 		log.Warnf("delete job error: %v", e)
 		c.JSON(http.StatusNotImplemented, gin.H{
 			"err": e,

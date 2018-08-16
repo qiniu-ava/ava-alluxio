@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ava-zk-svc
-  namespace: ava-prd
+  namespace: ava
   labels:
     app: ava-zk-svc
 spec:
@@ -20,7 +20,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ava-zk-cm
-  namespace: ava-prd
+  namespace: ava
 data:
   jvm.heap: "1G"
   tick: "2000"
@@ -34,6 +34,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: ava-zk-pdb
+  namespace: ava
 spec:
   selector:
     matchLabels:
@@ -44,13 +45,13 @@ apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: ava-zk
-  namespace: ava-prd
+  namespace: ava
 spec:
   serviceName: ava-zk-svc
   replicas: 3
   template:
     metadata:
-      namespace: ava-prd
+      namespace: ava
       labels:
         app: ava-zk
     spec:
@@ -137,7 +138,7 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
-      namespace: ava-prd
+      namespace: ava
       annotations:
         volume.beta.kubernetes.io/storage-class: "cephfs"
     spec:
