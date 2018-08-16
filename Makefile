@@ -42,6 +42,9 @@ tools-golang: tools-golang-clean tools-golang-macos tools-golang-linux
 tools-golang-macos:
 	cd tools/golang/src/qiniu.com/app && env GOOS=darwin go install ./...
 
+tools-golang-hack:
+	cd tools/golang/src/qiniu.com/app && go install -tags debug ./...
+
 tools-golang-linux:
 	cd tools/golang/src/qiniu.com/app && env GOOS=linux go install ./...
 

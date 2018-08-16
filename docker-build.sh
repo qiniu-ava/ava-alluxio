@@ -64,7 +64,7 @@ build_zookeeper() {
 }
 
 build_alluxio_dashboard() {
-  cd "$DIR"/docker/app/master-dashboard || return
+  cd "$DIR"/docker/app/alluxio || return
   docker build -t reg-xs.qiniu.io/atlab/alluxio-nginx:"$tag" .
   if [ "$push" == true ]; then
     docker push reg-xs.qiniu.io/atlab/alluxio-nginx:"$tag"
@@ -92,6 +92,8 @@ else
       ;;
       dashboard)
         build_alluxio_dashboard
+      ;;
+      -p|--push)
       ;;
       *)
         echo "usage: ${BASH_SOURCE[0]} [-p|--push] [appName] where appName could be one of all/avio/kafka/zookeeper/dashboard"

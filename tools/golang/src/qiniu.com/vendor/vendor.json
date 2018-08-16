@@ -335,12 +335,6 @@
 			"revisionTime": "2018-05-03T17:46:38Z"
 		},
 		{
-			"checksumSHA1": "ze1R6Lrk0kW0cX24ZdZD6ZpIDCo=",
-			"path": "github.com/samuel/go-zookeeper/zk",
-			"revision": "c4fab1ac1bec58281ad0667dc3f0907a9476ac47",
-			"revisionTime": "2018-01-30T19:37:22Z"
-		},
-		{
 			"checksumSHA1": "IU0RLDrXScjlsTwNWAKQLLsLoc0=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "92052687f8ec598ff0da626d2909478cfd1e3a3c",

@@ -17,12 +17,12 @@ if [ $git_dirty -ne 0 ]; then
   exit 1
 fi
 
-port=$( jq ".port" apiserver.conf )
+port=$( jq ".server.port" apiserver.conf )
 tag=$(git rev-parse --short=7 HEAD)
 sed "s/<APISERVER_PORT>/${port}/g" config.yml.template | sed "s/<REPOS_TAG>/${tag}/g" > config.yml
 
-kubectl delete configmap -n ava-prd avio-apiserver-config
-kubectl create configmap -n ava-prd avio-apiserver-config --from-file=apiserver.conf
-kubectl create -f ./test.yml
+kubectl delete configmap avio-apiserver-config
+kubectl create configmap avio-apiserver-config --from-file=apiserver.conf
+kubectl apply -f config.yml
 
 cd "$oldDir" || return

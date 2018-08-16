@@ -15,7 +15,7 @@
       - [pandora log download](#pandora-log-download)
     - [部署 cadvisor](#%E9%83%A8%E7%BD%B2-cadvisor)
     - [部署 node-export](#%E9%83%A8%E7%BD%B2-node-export)
-    - [配置 ava-prometheus](#配置-ava-prometheus)
+    - [配置 ava-prometheus](#%E9%85%8D%E7%BD%AE-ava-prometheus)
     - [部署 grafana](#%E9%83%A8%E7%BD%B2-grafana)
   - [工具](#%E5%B7%A5%E5%85%B7)
     - [生成 alluxio 包](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)

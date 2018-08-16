@@ -1,0 +1,102 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-proxy
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-proxy.ava.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-proxy-srv
+          servicePort: 39999
+        path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alluxio-proxy-srv
+  namespace: ava
+  labels:
+    app: alluxio-proxy-srv
+spec:
+  ports:
+  - port: 39999
+    name: web
+  clusterIP: None
+  selector:
+    app: alluxio-proxy
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alluxio-proxy
+  labels:
+    app: alluxio-proxy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: alluxio-proxy
+  template:
+    metadata:
+      labels:
+        app: alluxio-proxy
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-owner.qiniu.com/atlab
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - effect: NoSchedule
+        key: qiniu.com/owner
+        operator: Equal
+        value: atlab
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        value: "false"
+      hostNetwork: true
+      imagePullSecrets:
+        - name: atlab-images
+      containers:
+      - name: alluxio-proxy
+        image: reg-xs.qiniu.io/atlab/alluxio:latest
+        command: ["/entrypoint.sh"]
+        args: ["proxy"]
+        ports:
+        envFrom:
+        - configMapRef:
+            name: alluxio-proxy-configmap
+        ports:
+        - containerPort: 39999
+        resources:
+          requests:
+            cpu: 0.3
+            memory: 5Gi 
+          limits:
+            cpu: 1
+            memory: 6Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alluxio-proxy-configmap
+  namespace: ava
+data:
+  ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS: "2048"
+  ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS: "2048"
+  ALLUXIO_USER_FILE_MASTER_CLIENT_THREADS: "2048"
+  ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS: "8192"
+  ALLUXIO_SECURITY_GROUP_MAPPING_CLASS: ""
+  ALLUXIO_CLASSPATH: "/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar"
+  ALLUXIO_ZOOKEEPER_ENABLED: "true"
+  ALLUXIO_ZOOKEEPER_ADDRESS: "192.168.212.42:2181,192.168.212.45:2181,192.168.212.46:2181"
+  ALLUXIO_ZOOKEEPER_LEADER_PATH: "/leader/alluxio-ro"
+  ALLUXIO_ZOOKEEPER_ELECTION_PATH: "/election/alluxio-ro"
+  ALLUXIO_JAVA_OPTS: "-Xms4g -Xmx4g"

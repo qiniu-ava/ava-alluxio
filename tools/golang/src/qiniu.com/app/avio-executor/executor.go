@@ -1,7 +1,7 @@
 package main
 
 import (
-	atypo "qiniu.com/app/avio-apiserver/typo"
+	"qiniu.com/app/common/typo"
 	log "qiniupkg.com/x/log.v7"
 )
 
@@ -19,7 +19,7 @@ func NewPreloadExecutor(client *AlluxioClient) (p *PreloadExecutor) {
 
 func (p *PreloadExecutor) Do(path string) error {
 	log.Infof("get kafka message to preload file from %s", path)
-	return p.client.Call(atypo.PreloadJobType, path)
+	return p.client.Call(typo.PreloadJobType, path)
 }
 
 type SaveExecutor struct {
@@ -32,5 +32,5 @@ func NewSaveExecutor(client *AlluxioClient) (p *SaveExecutor) {
 
 func (p *SaveExecutor) Do(path string) error {
 	log.Infof("get kafka message to save file from %s", path)
-	return p.client.Call(atypo.SaveJobType, path)
+	return p.client.Call(typo.SaveJobType, path)
 }

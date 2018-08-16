@@ -12,4 +12,5 @@ type kafkaConfig struct {
 type Config struct {
 	Kafka   kafkaConfig          `json:"kafka"`
 	Alluxio common.AlluxioConfig `json:"alluxio"`
+	Log     common.Log           `json:"log"`
 }

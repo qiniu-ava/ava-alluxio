@@ -1,10 +1,8 @@
 package utils
 
-type mongoConfig struct {
-	Host            string `json:"host"`
-	DBName          string `json:"dbname"`
-	SessionPoolSize int    `json:"sessionPoolSize"`
-}
+import (
+	"qiniu.com/app/common"
+)
 
 type kafkaConfig struct {
 	Brokers   []string `json:"brokers"`
@@ -15,10 +13,14 @@ type kafkaConfig struct {
 	Topic     string   `json:"topic"`
 }
 
+type httpServerConfig struct {
+	Port int `json:"port"`
+}
+
 type Config struct {
-	DB                   mongoConfig `json:"db"`
-	KAFKA                kafkaConfig `json:"kafka"`
-	CollSessionPoolLimit int         `json:"coll_session_pool_limit"`
-	ReadTimeout          int         `json:"readTimeout"`
-	WriteTimeout         int         `json:"writeTimeout"`
+	Server  httpServerConfig     `json:"server"`
+	DB      common.MongoConfig   `json:"db"`
+	KAFKA   kafkaConfig          `json:"kafka"`
+	Alluxio common.AlluxioConfig `json:"alluxio"`
+	Log     common.Log           `json:"log"`
 }

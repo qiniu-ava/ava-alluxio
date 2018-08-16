@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: avio-kafka-svc
-  namespace: ava-prd
+  namespace: ava
   labels:
     app: avio-kafka
 spec:
@@ -18,7 +18,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: avio-kafka-pdb
-  namespace: ava-prd
+  namespace: ava
 spec:
   selector:
     matchLabels:
@@ -29,7 +29,7 @@ apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: avio-kafka
-  namespace: ava-prd
+  namespace: ava
 spec:
   serviceName: avio-kafka-svc
   replicas: 3
@@ -37,7 +37,7 @@ spec:
     metadata:
       labels:
         app: avio-kafka
-        namespace: ava-prd
+        namespace: ava
     spec:
       terminationGracePeriodSeconds: 300
       imagePullSecrets:
@@ -58,7 +58,7 @@ spec:
         - -c
         - "exec kafka-server-start.sh /opt/kafka/config/server.properties --override broker.id=${HOSTNAME##*-} \
           --override listeners=PLAINTEXT://:9093 \
-          --override zookeeper.connect=ava-zk-0.ava-zk-svc.ava-prd.svc.cluster.local:2181,ava-zk-1.ava-zk-svc.ava-prd.svc.cluster.local:2181,ava-zk-2.ava-zk-svc.ava-prd.svc.cluster.local:2181 \
+          --override zookeeper.connect=ava-zk-0.ava-zk-svc.ava.svc.cluster.local:2181,ava-zk-1.ava-zk-svc.ava.svc.cluster.local:2181,ava-zk-2.ava-zk-svc.ava.svc.cluster.local:2181 \
           --override log.dir=/var/lib/kafka \
           --override auto.create.topics.enable=true \
           --override auto.leader.rebalance.enable=true \
@@ -160,7 +160,7 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
-      namespace: ava-prd
+      namespace: ava
       annotations:
         volume.beta.kubernetes.io/storage-class: "cephfs"
     spec:

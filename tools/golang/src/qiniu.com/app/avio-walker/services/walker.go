@@ -4,8 +4,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"qiniu.com/app/avio-walker/database"
 	"qiniu.com/app/avio-walker/walker"
+	"qiniu.com/app/common/database"
 	log "qiniupkg.com/x/log.v7"
 )
 
@@ -36,7 +36,7 @@ func (w *walkJobService) StartWalkJob(c *gin.Context) {
 		return
 	}
 
-	uid, e := strconv.Atoi(u)
+	uid, e := strconv.ParseInt(u, 10, 64)
 
 	if e != nil {
 		log.Warnf("bad request, invalid header X-UID")
