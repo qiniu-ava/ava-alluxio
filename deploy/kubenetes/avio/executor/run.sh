@@ -17,12 +17,11 @@ if [ $git_dirty -ne 0 ]; then
   exit 1
 fi
 
-port=$( jq ".port" executor.conf )
 tag=$(git rev-parse --short=7 HEAD)
 sed "s/<REPOS_TAG>/${tag}/g" config.yml.template > config.yml
 
-kubectl delete configmap -n ava-prd avio-executor-config
-kubectl create configmap -n ava-prd avio-executor-config --from-file=executor.conf
-kubectl create -f ./test.yml
+kubectl delete configmap avio-executor-config
+kubectl create configmap avio-executor-config --from-file=executor.conf
+kubectl apply -f config.yml
 
 cd "$oldDir" || return

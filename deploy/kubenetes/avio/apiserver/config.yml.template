@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: avio-apiserver
-  namespace: ava-prd
+  namespace: ava
 spec:
   rules:
   - host: "avio-apiserver.ava.ke-xs.cloudappl.com"
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: avio-apiserver
-  namespace: ava-prd
+  namespace: ava
   labels:
     app: avio-apiserver
 spec:
@@ -32,16 +32,32 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: avio-apiserver
-  namespace: ava-prd
+  namespace: ava
 spec:
-  serviceName: avio-apiserver-svc
   replicas: 3
   template:
     metadata:
       labels:
         app: avio-apiserver
-        namespace: ava-prd
+        namespace: ava
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-owner.qiniu.com/atlab
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - effect: NoSchedule
+        key: qiniu.com/owner
+        operator: Equal
+        value: atlab
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        value: "false"
       imagePullSecrets:
       - name: atlab-images
       containers:
@@ -51,12 +67,12 @@ spec:
         command:
         - /opt/avio-apiserver
         - -f
-        - /opt/config/avio-apiserver.conf
+        - /opt/config/apiserver.conf
         resources:
           requests:
             memory: "256Mi"
             cpu: 500m
-          limit:
+          limits:
             memory: "1Gi"
             cpu: 1500m
         ports:
@@ -65,7 +81,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /opt/config
-    volumes:
-      - name: config-volume
-        configMap:
-          name: avio-apiserver-config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: avio-apiserver-config

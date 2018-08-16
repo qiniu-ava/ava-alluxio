@@ -1,0 +1,108 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-master-video-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-dashboard-video.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-dashboard
+          servicePort: 80
+        path: /
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-master-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-dashboard.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-dashboard
+          servicePort: 80
+        path: /
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alluxio-proxy
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-proxy.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-dashboard
+          servicePort: 80
+        path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alluxio-dashboard
+  namespace: ava
+  labels:
+    app: alluxio-dashboard
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: alluxio-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alluxio-dashboard
+  labels:
+    app: alluxio-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alluxio-nginx
+  template:
+    metadata:
+      labels:
+        app: alluxio-nginx
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-owner.qiniu.com/atlab
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - effect: NoSchedule
+        key: qiniu.com/owner
+        operator: Equal
+        value: atlab
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        value: "false"
+      hostNetwork: true
+      imagePullSecrets:
+        - name: atlab-images
+      containers:
+      - name: nginx
+        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.8
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 0.1
+            memory: 512Mi 
+          limits:
+            cpu: 0.5
+            memory: 2Gi

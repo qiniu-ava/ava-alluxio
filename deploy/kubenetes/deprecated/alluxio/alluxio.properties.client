@@ -12,7 +12,7 @@ ALLUXIO_USER_BLOCK_SIZE_BYTES_DEFAULT=1MB
 ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=8192
 ALLUXIO_SECURITY_GROUP_MAPPING_CLASS=""
 
-ALLUXIO_CLASSPATH"=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar
+ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar
 
 ALLUXIO_ZOOKEEPER_ENABLED=true
 ALLUXIO_ZOOKEEPER_ADDRESS=alluxio-readonly-zk-cs:2181

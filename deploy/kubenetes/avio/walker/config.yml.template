@@ -1,16 +1,15 @@
 apiVersion: apps/v1beta1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: avio-walker
-  namespace: ava-prd
+  namespace: ava
 spec:
-  serviceName: avio-walker-svc
   replicas: 3
   template:
     metadata:
       labels:
         app: avio-walker
-        namespace: ava-prd
+        namespace: ava
     spec:
       affinity:
         nodeAffinity:
@@ -31,16 +30,15 @@ spec:
       - name: avio-walker
         imagePullPolicy: Always
         image: reg-xs.qiniu.io/atlab/avio-walker:<REPOS_TAG>
-        hostname: status.hostIP
         command:
         - /opt/avio-walker
         - -f
-        - /opt/config/avio-walker.conf
+        - /opt/config/walker.conf
         resources:
           requests:
             memory: "256Mi"
             cpu: 500m
-          limit:
+          limits:
             memory: "1Gi"
             cpu: 1500m
         ports:
@@ -49,7 +47,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /opt/config
-    volumes:
-      - name: config-volume
-        configMap:
-          name: avio-walker-config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: avio-walker-config
