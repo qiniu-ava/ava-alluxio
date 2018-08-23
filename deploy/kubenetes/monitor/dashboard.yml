@@ -1,15 +1,15 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: alluxio-master-readonly-dashboard
+  name: alluxio-master-dashboard
   namespace: ava
 spec:
   rules:
-  - host: "alluxio-readonly-dashboard.ava-prd.kegate-jq.cloudappl.com"
+  - host: "alluxio-dashboard.ava-prd.kegate-jq.cloudappl.com"
     http:
       paths:
       - backend:
-          serviceName: alluxio-readonly-dashboard
+          serviceName: alluxio-dashboard
           servicePort: 80
         path: /
 ---
@@ -24,17 +24,17 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: alluxio-readonly-dashboard
+          serviceName: alluxio-dashboard
           servicePort: 80
         path: /
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: alluxio-readonly-dashboard
+  name: alluxio-dashboard
   namespace: ava
   labels:
-    app: alluxio-readonly-dashboard
+    app: alluxio-dashboard
 spec:
   ports:
   - port: 80
@@ -59,6 +59,27 @@ spec:
       labels:
         app: alluxio-nginx
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-owner.qiniu.com/atlab
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - effect: NoSchedule
+        key: qiniu.com/owner
+        operator: Equal
+        value: atlab
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        value: "false"
+      - effect: NoSchedule
+        key: node-role.qiniu.com/test-only
+        operator: Equal
+        value: "true"
       hostNetwork: true
       imagePullSecrets:
         - name: atlab-images
