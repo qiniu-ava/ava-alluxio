@@ -54,7 +54,9 @@ ENV LC_ALL=C.UTF-8
 # add alluxio package
 # ---------------------------------------------------------------
 
-ADD alluxio-1.7.2-SNAPSHOT /opt/alluxio
+ARG ALLUXIO_VERSION=1.8.1-SNAPSHOT
+
+ADD alluxio-${ALLUXIO_VERSION} /opt/alluxio
 COPY entrypoint.sh /
 ENV TERM=xterm
 ENTRYPOINT ["/entrypoint.sh"]
