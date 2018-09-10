@@ -42,7 +42,6 @@ docker run -d \
   -p "${ALLUXIO_WORKER_WEB_PORT}":"${ALLUXIO_WORKER_WEB_PORT}" \
   -v "${ALLUXIO_WORKER_RAM_DISK}":/opt/ramdisk \
   -v "${ALLUXIO_WORKER_SSD_DISK}":/opt/cachedisk \
-  -v "${ALLUXIO_WORKER_UNDERFSSTORAGE}":/underStorage \
   --restart=always \
   alluxio \
   worker --no-format
