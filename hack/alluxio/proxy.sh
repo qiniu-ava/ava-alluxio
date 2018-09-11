@@ -9,7 +9,7 @@ fi
 
 # shellcheck disable=SC1090
 source "$DIR"/env
-myip=$(ifconfig | grep -E -A6 "^en0:" | grep -E "^\\s+inet " | awk '{print $2}')
+myip=$(ifconfig | grep -E -A6 "^en0:|^bond0" | grep -E "^\\s+inet " | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1)
 docker rm -f alluxio-proxy
 docker run -d \
   --name alluxio-proxy \
