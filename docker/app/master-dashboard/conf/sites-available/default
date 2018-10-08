@@ -22,7 +22,7 @@ server {
 	# Add index.php to the list if you are using PHP
 	index index.html index.htm index.nginx-debian.html;
 
-	server_name _;
+	server_name alluxio-dashboard.ava-prd.kegate-jq.cloudappl.com;
 
 	location / {
 		# First attempt to serve request as file, then
@@ -30,6 +30,22 @@ server {
 		proxy_pass http://dashboard;
 	}
 
+}
+
+server {
+        listen 80;
+        server_name alluxio-dashboard-video.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://video;
+        }
+}
+
+server {
+        listen 80;
+        server_name alluxio-dashboard-lego.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://lego;
+        }
 }
 
 server {
