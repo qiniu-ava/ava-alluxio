@@ -14,6 +14,7 @@ docker rm -f alluxio-proxy
 docker run -d \
   --name alluxio-proxy \
   --hostname "$myip" \
+  --privileged=true \
   -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
   -e ALLUXIO_MASTER_HOSTNAME="$myip" \
   -e ALLUXIO_PROXY_WEB_PORT="${ALLUXIO_PROXY_WEB_PORT}" \
