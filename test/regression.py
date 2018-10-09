@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 '''
-usage: python regression.py ak sk bucket container_name
+usage: python regression.py <ak> <sk> <bucket> <container_name>
 Preconditions:
 1. Known ak/sk of avatest account
 2. In the bucket of the avatest account, the folder_1w folder is already included,
@@ -61,55 +61,55 @@ def main():
     cmd0 = docker+"/opt/alluxio/bin/alluxio fs mkdir /a/b/1381351869 /a/b/1381102889"
     cmd1 = docker+"/opt/alluxio/bin/alluxio fs mkdir /a/b/1381351869"
     cmd2 = docker+"/opt/alluxio/bin/alluxio fs mount \
-    --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
-    --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
-    --option fs.oss.userId=1381351869 \
-    --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
-    /a/b/1381351869/alluxio-test oss://"+sys.argv[3]
+        --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
+        --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
+        --option fs.oss.userId=1381351869 \
+        --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
+        /a/b/1381351869/alluxio-test oss://"+sys.argv[3]
     cmd3 = docker+"/opt/alluxio/bin/alluxio fs mount \
-    --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
-    --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
-    --option fs.oss.userId=1381102889 \
-    --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
-    /a/b/1381102889/alluxio-test oss://"+sys.argv[3]
+        --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
+        --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
+        --option fs.oss.userId=1381102889 \
+        --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
+        /a/b/1381102889/alluxio-test oss://"+sys.argv[3]
     cmd4 = docker+"/opt/alluxio/bin/alluxio fs mount \
-    --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
-    --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
-    --option fs.oss.userId=1381102889 \
-    --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
-    /a/b/1381102889/alluxio-test oss://"+sys.argv[3]
+        --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
+        --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
+        --option fs.oss.userId=1381102889 \
+        --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
+        /a/b/1381102889/alluxio-test oss://"+sys.argv[3]
     cmd5 = docker+"/opt/alluxio/bin/alluxio fs mount \
-    --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
-    --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
-    --option fs.oss.userId=1381102889 \
-    --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
-    /a/b/not_exists_path/alluxio-test oss://"+sys.argv[3]
+        --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
+        --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
+        --option fs.oss.userId=1381102889 \
+        --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
+        /a/b/not_exists_path/alluxio-test oss://"+sys.argv[3]
     cmd6 = docker+"/opt/alluxio/bin/alluxio fs mount \
-    --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
-    --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
-    --option fs.oss.userId=1381102889 \
-    --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
-    /a/b/1381351869/alluxio-test oss://"+sys.argv[3]
+        --option fs.oss.accessKeyId=wb3L0e4GBOf_Kq4IVS8y9Csq9fC3u8UDmqb2S-pj \
+        --option fs.oss.accessKeySecret=XWo3jAwdW7ETQnJsnWTIRedrmEc6Au-8jt2Xj9KV \
+        --option fs.oss.userId=1381102889 \
+        --option fs.oss.endpoint=petvhg8di.bkt.clouddn.com \
+        /a/b/1381351869/alluxio-test oss://"+sys.argv[3]
     cmd7 = docker+"/opt/alluxio/bin/alluxio fs unmount /a/b/1381351869/alluxio-test"
     cmd8 = docker+"/opt/alluxio/bin/alluxio fs unmount /a/b/not_exists_path/alluxio-test"
     cmd9 = docker+"mkdir -p /test-alluxio-fuse" \
-    +"&&"+docker+"/opt/alluxio/integration/fuse/bin/alluxio-fuse \
-    mount /test-alluxio-fuse /a/b/1381102889/alluxio-test"
+        +"&&"+docker+"/opt/alluxio/integration/fuse/bin/alluxio-fuse \
+        mount /test-alluxio-fuse /a/b/1381102889/alluxio-test"
     cmd10 = docker+"/opt/alluxio/integration/fuse/bin/alluxio-fuse umount /test-alluxio-fuse" \
-    +"&&"+docker+ "/opt/alluxio/integration/fuse/bin/alluxio-fuse \
-    mount /test-alluxio-fuse /a/b/1381102889/alluxio-test "
+        +"&&"+docker+ "/opt/alluxio/integration/fuse/bin/alluxio-fuse \
+        mount /test-alluxio-fuse /a/b/1381102889/alluxio-test "
     cmd11 = docker+"/opt/alluxio/bin/alluxio fs ls /a/b/1381102889/alluxio-test"
     cmd12 = docker+"/opt/alluxio/bin/alluxio fs ls /a/b/1381102889/alluxio-test/path_not_exists"
     cmd13 = docker+'bash -c "echo test-alluxio-fuse-write > /test-alluxio-fuse/test-write"'
     cmd14 = docker+"/opt/alluxio/bin/alluxio fs cat /a/b/1381102889/alluxio-test/test-write"
     cmd15 = docker+"/opt/alluxio/bin/alluxio fs mv /a/b/1381102889/alluxio-test/test-write \
-    /a/b/1381102889/alluxio-test/write-test"+"&&"+docker+"/opt/alluxio/bin/alluxio fs mv \
-    /a/b/1381102889/alluxio-test/write-test /a/b/1381102889/alluxio-test/test-write"
+        /a/b/1381102889/alluxio-test/write-test"+"&&"+docker+"/opt/alluxio/bin/alluxio fs mv \
+        /a/b/1381102889/alluxio-test/write-test /a/b/1381102889/alluxio-test/test-write"
     cmd16 = docker+"rm /test-alluxio-fuse/test-write"
     cmd17 = docker+'dd if=/dev/urandom of=/test-alluxio-fuse/test-write-2G bs=4M count=512'
     cmd18 = docker+'dd if=/test-alluxio-fuse/test-write-2G of=/dev/null bs=4M'
-    cmd19 = docker+"curl -O http://devtools.qiniu.com/linux/amd64/qrsctl?ref=developer.qiniu.com" \
-        +"&&"+docker+r"mv qrsctl\?ref\=developer.qiniu.com qrsctl" \
+    cmd19 = docker+"curl -O http://devtools.qiniu.com/linux/amd64/qrsctl?ref=developer.qiniu.com \
+        -o qrsctl" \
         +"&&"+docker+"chmod +x qrsctl" \
         +"&&"+docker+"mv qrsctl /usr/local/bin" \
         +"&&"+docker+"qrsctl login "+sys.argv[1]+" "+sys.argv[2] \
@@ -125,10 +125,10 @@ def main():
     cmd20 = docker+'ls -l /test-alluxio-fuse/folder_1w'
 
     title = [title0, title1, title2, title3, title4, title5, title6, title7, title8, title9,\
-    title10, title11, title12, title13, title14, title15, title16, title17, title18, title19,\
-    title20]
+        title10, title11, title12, title13, title14, title15, title16, title17, title18, title19,\
+        title20]
     cmd = [cmd0, cmd1, cmd2, cmd3, cmd4, cmd5, cmd6, cmd7, cmd8, cmd9, cmd10, cmd11, cmd12, \
-    cmd13, cmd14, cmd15, cmd16, cmd17, cmd18, cmd19, cmd20]
+        cmd13, cmd14, cmd15, cmd16, cmd17, cmd18, cmd19, cmd20]
 
     for i in range(len(title)):
         if i == 0:
@@ -142,6 +142,6 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) != 5:
-        print "usage:python regression.py ak sk bucket container_name"
+        print "usage:python regression.py <ak> <sk> <bucket> <container_name>"
         sys.exit()
     main()
