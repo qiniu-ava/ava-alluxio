@@ -1,15 +1,12 @@
 #!/bin/bash
 
-bold=$(tput bold)
-normal=$(tput sgr0)
-
 CONFIGURE_LOCK="/opt/alluxio/configure.lock"
 
 CUR_DIR=$(cd "$( dirname "$( readlink "$0" || echo "$0" )" )"; pwd)
 USAGE="${CUR_DIR}/alluxio-flex-volume.sh <command> <options>
   command:
-    ${bold}mount${normal} [--group=<group_name>] [--mode=<read_write_mode>] --uid=<uid> --ak=<access_key> --sk=<secret_key> --bucket=<bucket_name> --domain=<bucket_domain> --local_path=<local_path>
-    ${bold}unmount${normal} <local_path>
+    mount [--group=<group_name>] [--mode=<read_write_mode>] --uid=<uid> --ak=<access_key> --sk=<secret_key> --bucket=<bucket_name> --domain=<bucket_domain> --local_path=<local_path>
+    unmount <local_path>
 "
 
 print_usage() {
