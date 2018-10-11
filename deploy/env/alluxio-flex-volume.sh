@@ -1,15 +1,12 @@
 #!/bin/bash
 
-bold=$(tput bold)
-normal=$(tput sgr0)
-
 CONFIGURE_LOCK="/opt/alluxio/configure.lock"
 
 CUR_DIR=$(cd "$( dirname "$( readlink "$0" || echo "$0" )" )"; pwd)
 USAGE="${CUR_DIR}/alluxio-flex-volume.sh <command> <options>
   command:
-    ${bold}mount${normal} [--group=<group_name>] [--mode=<read_write_mode>] --uid=<uid> --ak=<access_key> --sk=<secret_key> --bucket=<bucket_name> --domain=<bucket_domain> --local_path=<local_path>
-    ${bold}unmount${normal} <local_path>
+    mount [--mode=<read_write_mode>] --group=<group_name> --uid=<uid> --ak=<access_key> --sk=<secret_key> --bucket=<bucket_name> --domain=<bucket_domain> --local_path=<local_path>
+    umount <local_path>
 "
 
 print_usage() {
@@ -22,18 +19,10 @@ acquire_configure() {
     sleep 1
   done
 
-  local group
-  group=$1
+  cp "$CUR_DIR/conf/alluxio-env-$1.sh" "$CUR_DIR/conf/alluxio-env.sh"
+  cp "$CUR_DIR/conf/alluxio-site-$1.properties" "$CUR_DIR/conf/alluxio-site.properties"
 
-  if [[ -f "$CUR_DIR/conf/alluxio-env-$group.sh" && -f "$CUR_DIR/conf/alluxio-site-$group.properties" ]]; then
-    cp "$CUR_DIR/conf/alluxio-env-$group.sh" "$CUR_DIR/conf/alluxio-env.sh"
-    cp "$CUR_DIR/conf/alluxio-site-$group.properties" "$CUR_DIR/conf/alluxio-site.properties"
-  else
-    cp "$CUR_DIR/conf/alluxio-env-default.sh" "$CUR_DIR/conf/alluxio-env.sh"
-    cp "$CUR_DIR/conf/alluxio-site-default.properties" "$CUR_DIR/conf/alluxio-site.properties"
-  fi
-
-  if [ $? -ne 0 ]; then
+  if [ "$?" -ne 0 ]; then
     echo "failed to copy alluxio configure"
     exit 10
   fi
@@ -56,7 +45,7 @@ flex_volume_mount() {
   local local_path
   local alluxio_uid_path
 
-  for i in $@; do
+  for i in "$@"; do
     case $i in
       --group=*)
         group="${i#*=}"
@@ -87,8 +76,13 @@ flex_volume_mount() {
     esac
   done
 
-  if [ "$group" = "" ]; then
+  if [[ -f "$CUR_DIR/conf/alluxio-env-$group.sh" && -f "$CUR_DIR/conf/alluxio-site-$group.properties" ]]; then
+    group="$group"
+  else
     group=default
+  fi
+
+  if [ "$group" = "default" ]; then
     alluxio_uid_path="/ava/qn-bucket/$uid"
   else
     alluxio_uid_path="/$uid"
@@ -100,9 +94,9 @@ flex_volume_mount() {
 
   # create path in alluxio
   acquire_configure "$group"
-  ${CUR_DIR}/bin/alluxio fs mkdir "$alluxio_uid_path"
-  ${CUR_DIR}/bin/alluxio fs stat "$alluxio_uid_path"
-  if [ $? -ne 0 ]; then
+  "${CUR_DIR}"/bin/alluxio fs mkdir "$alluxio_uid_path"
+  "${CUR_DIR}"/bin/alluxio fs stat "$alluxio_uid_path"
+  if [ "$?" -ne 0 ]; then
     echo "failed to create path for $uid in $group"
     release_configure
     exit 20
@@ -111,18 +105,18 @@ flex_volume_mount() {
 
   # mount bucket in alluxio
   acquire_configure "$group"
-  ${CUR_DIR}/bin/alluxio fs mount \
-    --option fs.oss.accessKeyId=${ak} \
-    --option fs.oss.accessKeySecret=${sk} \
-    --option fs.oss.endpoint=${domain} \
-    --option fs.oss.userId=${uid} \
+  "${CUR_DIR}"/bin/alluxio fs mount \
+    --option fs.oss.accessKeyId="${ak}" \
+    --option fs.oss.accessKeySecret="${sk}" \
+    --option fs.oss.endpoint="${domain}" \
+    --option fs.oss.userId="${uid}" \
     "$alluxio_uid_path/$bucket" \
     "oss://$bucket"
   release_configure
 
   # mount alluxio path to local path
   acquire_configure "$group"
-  ${CUR_DIR}/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uid_path/$bucket" -o "$mode"
+  "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uid_path/$bucket" -o "$mode"
   release_configure
 }
 
@@ -132,7 +126,7 @@ flex_volume_unmount() {
     print_usage
   fi
 
-  ${CUR_DIR}/integration/fuse/bin/alluxio-fuse umount "$1"
+  "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse umount "$1"
 }
 
 if [ "$#" -lt 1 ]; then
@@ -142,11 +136,11 @@ fi
 case "$1" in
   mount)
     shift
-    flex_volume_mount $@
+    flex_volume_mount "$@"
   ;;
-  unmount)
+  umount)
     shift
-    flex_volume_unmount $@
+    flex_volume_unmount "$@"
   ;;
   *)
     print_usage
