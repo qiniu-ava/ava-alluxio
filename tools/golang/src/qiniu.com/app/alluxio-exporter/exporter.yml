@@ -1,0 +1,19 @@
+alluxio:
+  - type: master
+    host: alluxio-dashboard.ava-prd.kegate-jq.cloudappl.com
+  - type: worker
+    host: 192.168.213.42:30000
+  - type: worker
+    host: 192.168.213.45:30000
+  - type: worker
+    host: 192.168.213.46:30000
+  - type: worker
+    host: 192.168.213.47:30000
+  - type: worker
+    host: 192.168.213.48:30000
+  - type: worker-writer
+    host: 192.168.213.50:29900
+  - type: worker-writer
+    host: 192.168.213.51:29900
+  - type: worker-writer
+    host: 192.168.213.52:29900
