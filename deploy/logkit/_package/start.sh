@@ -51,23 +51,20 @@ for i in "$@"; do
 done
 
 if  [ "$AK" != "" ] && [ "$SK" != "" ]; then
-  for file in "$DIR"/confs/* ; do
-    temp_file=$(basename "$file")
-    sed -i 's/\"pandora_ak\": <pandora_ak>/\"pandora_ak\": \"'"$AK"'\"/' "$DIR"/confs/"$temp_file"
-    sed -i 's/\"pandora_sk\": <pandora_sk>/\"pandora_sk\": \"'"$SK"'\"/' "$DIR"/confs/"$temp_file"
-  done
-  nowdate="$(date --rfc-3339=ns | sed 's/ /T/; s/+.*/Z')"
+  sed -i 's/\"ak\": ""/\"ak\": \"'"$AK"'\"/' "$DIR"/logkit.conf
+  sed -i 's/\"sk\": ""/\"sk\": \"'"$SK"'\"/' "$DIR"/logkit.conf
+  nowdate="$(date --rfc-3339=ns | sed 's/ /T/; s/+.*/Z/')"
   for file in "$DIR"/script/* ; do
     temp_file=$(basename "$file")
     sed -i "1,3s/.*#SAVE_TIME/logTime=${nowdate} #SAVE_TIME/" "$DIR"/script/"$temp_file"
   done
-  logkitPID="$(pgrep logkit)"
+  logkitPID="$(ps -aux | grep logkit.conf | grep -v grep | awk '{print $2}')"
   if [ "$logkitPID" != "" ]; then
     for i in $logkitPID; do
       kill -9 "$logkitPID"
     done
   fi
-  nohup ./logkit -f logkit.conf > ../logkit.out 2>&1 &
+  nohup ./logkit-pro -f logkit.conf > ../logkit.out 2>&1 &
 else
   echo "please check your AKSK or account path"
 fi

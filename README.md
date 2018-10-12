@@ -14,8 +14,9 @@
       - [logkit config](#logkit-config)
       - [pandora log download](#pandora-log-download)
     - [部署 cadvisor](#%E9%83%A8%E7%BD%B2-cadvisor)
-    - [部署 node-export](#%E9%83%A8%E7%BD%B2-node-export)
-    - [配置 ava-prometheus](#%E9%85%8D%E7%BD%AE-ava-prometheus)
+    - [部署 node-exporter](#%E9%83%A8%E7%BD%B2-node-exporter)
+    - [部署 alluxio-exporter](#%E9%83%A8%E7%BD%B2-alluxio-exporter)
+    - [配置 ava-prometheus](#配置-ava-prometheus)
     - [部署 grafana](#%E9%83%A8%E7%BD%B2-grafana)
   - [工具](#%E5%B7%A5%E5%85%B7)
     - [生成 alluxio 包](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)
@@ -209,42 +210,57 @@ cd _package_mac/
 
 使用方式:
 
-1. 运行logDownload.py
+1. 安装requests包
+
+```shell
+pip install requests
+```
+
+2. 运行logDownload.py
 
 ```shell
 cd <logkit path>/pandora/
 python logDownload.py
 ```
 
-2. 根据提示输入pandora日志仓库名称, AK, SK, from, scroll。`from`是一个`int`值，表示从第几条日志开始下载; `scroll`是一个时间段，可输入的字符串如 `10s, 20m, 1h`。经测试 `from` 和 `scroll` 属性在该API中无效, 已经向pandora反馈.
+3. 根据提示输入pandora日志仓库名称, AK, SK, from, scroll。`from`是一个`int`值，表示从第几条日志开始下载; `scroll`是一个时间段，可输入的字符串如 `10s, 20m, 1h`。经测试 `from` 和 `scroll` 属性在该API中无效, 已经向pandora反馈.
 
-3. 输入完成后, 开始下载, 下载时若没有错误会在屏幕打印下载次数和返回的`scroll_id`, 最后一次下载完会打印`readLog Success`表示下载成功; 若下载过程中出错, 会打印出错信息, 并提示`readLog Fail`.
+4. 输入完成后, 开始下载, 下载时若没有错误会在屏幕打印下载次数和返回的`scroll_id`, 最后一次下载完会打印`readLog Success`表示下载成功; 若下载过程中出错, 会打印出错信息, 并提示`readLog Fail`.
 
 ### 部署 cadvisor
 
 在 jq13 ~ 17, jq19 ~ 21 上, 执行以下命令:
 
 ```shell
-cd /alluxio-share/workspace/repos/prometheus/
+cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 ./cadvisor.sh start/restart
 ```
 
-### 部署 node-export
+### 部署 node-exporter
 
 在 jq13 ~ 17, jq19 ~ 21 上, 执行以下命令:
 
 ```shell
-cd /alluxio-share/workspace/repos/prometheus/
+cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 ./node-export.sh start/restart
 ```
 
-@TODO:
+### 部署 alluxio-exporter
 
-  1. 利用textfile collect采集更多信息，如文件夹大小、master状态
+暂定在 jq17 上, 执行以下命令:
+
+```shell
+cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
+./alluxio-export.sh start/restart
+```
+
+补充:
+alluxio-exporter 启动时需要exporter.yml配置文件，其中需要alluxio组件类型和host地址，可参考 `/alluxio-share/workspace/repos/ava-alluxio/tools/golang/qiniu.com/app/alluxio-exporter/exporter.yml`
 
 ### 配置 ava-prometheus
 
 参考文档: [ServiceMoniter 监控配置参考文档](https://cf.qiniu.io/pages/viewpage.action?pageId=37716151)
+配置文件可参考：[ServiceMoniter 监控文件](https://gitlab.qiniu.io/ava/ava-deploy/tree/master/apps/alluxio-monitor)
 
 补充:
 
@@ -260,7 +276,7 @@ cd /alluxio-share/workspace/repos/prometheus/
 
 部署步骤：
 
-1. 编写k8s中grafana服务所需的配置文件，可参考[ava-dashboard的配置文件](https://gitlab.qiniu.io/ava/ava-deploy/tree/master/apps/ava-dashboard), `configmap` 中 `datasource.ymal` 中 `url` 为数据源的 `url` , `configmap` 中 `grafana.ini` 需要加入 `email` 报警所需的 `[smtp]` 配置, 配置属性如下:
+1. 编写k8s中grafana服务所需的配置文件，可参考[alluxio-dashboard的配置文件](https://gitlab.qiniu.io/ava/ava-deploy/tree/master/apps/alluxio-dashboard), `configmap` 中 `datasource.ymal` 中 `url` 为数据源的 `url` , `configmap` 中 `grafana.ini` 需要加入 `email` 报警所需的 `[smtp]` 配置, 配置属性如下:
 
 ```ini
 [smtp]
