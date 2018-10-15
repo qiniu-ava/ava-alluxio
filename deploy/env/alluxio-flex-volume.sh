@@ -2,6 +2,7 @@
 
 CONFIGURE_LOCK="/opt/alluxio/configure.lock"
 
+# shellcheck disable=SC2164
 CUR_DIR=$(cd "$( dirname "$( readlink "$0" || echo "$0" )" )"; pwd)
 USAGE="${CUR_DIR}/alluxio-flex-volume.sh <command> <options>
   command:
@@ -21,11 +22,6 @@ acquire_configure() {
 
   cp "$CUR_DIR/conf/alluxio-env-$1.sh" "$CUR_DIR/conf/alluxio-env.sh"
   cp "$CUR_DIR/conf/alluxio-site-$1.properties" "$CUR_DIR/conf/alluxio-site.properties"
-
-  if [ "$?" -ne 0 ]; then
-    echo "failed to copy alluxio configure"
-    exit 10
-  fi
 
   echo "this file is somelike a lock for alluxio configures" > "${CONFIGURE_LOCK}"
 }
@@ -92,14 +88,14 @@ flex_volume_mount() {
     mode=ro
   fi
 
-  # create path in alluxio
+  # create user path in alluxio if it doesn't exist
   acquire_configure "$group"
-  "${CUR_DIR}"/bin/alluxio fs mkdir "$alluxio_uid_path"
-  "${CUR_DIR}"/bin/alluxio fs stat "$alluxio_uid_path"
-  if [ "$?" -ne 0 ]; then
-    echo "failed to create path for $uid in $group"
-    release_configure
-    exit 20
+  if ! "${CUR_DIR}"/bin/alluxio fs stat "$alluxio_uid_path" ; then
+    if ! "${CUR_DIR}"/bin/alluxio fs mkdir "$alluxio_uid_path" ; then
+      echo "failed to create path for $uid in $group"
+      release_configure
+      exit 10
+    fi
   fi
   release_configure
 
@@ -126,7 +122,11 @@ flex_volume_unmount() {
     print_usage
   fi
 
-  "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse umount "$1"
+  if mount | grep "$1" ; then
+    "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse umount "$1"
+  else
+    echo "$1 is not a mountpoint"
+  fi
 }
 
 if [ "$#" -lt 1 ]; then
