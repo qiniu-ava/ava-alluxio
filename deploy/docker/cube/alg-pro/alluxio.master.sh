@@ -5,41 +5,49 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cmd=$1
 
 if [ "$cmd" = "" ]; then
-  echo "usage: ./alluxio.client.sh <cmd>, where cmd should be one of pull/start/restart/remove/status"
+  echo "usage: ./alluxio.master.sh <cmd> [options]"
+  echo "  where cmd should be one of pull/start/restart/remove/status"
+  echo "  options:"
+  echo "    pull [tag] default tag will be <hashofalluxio-hashofkodo>"
   exit 1
 fi
 
 start() {
+  # master 容器运行时申请的内存上限，分配给 jvm 的内存上限为 64g，
+  # 另加上最多 2048 个线程，每个线程 4m 的栈，master 进程最多可占
+  # 用 72g 内存
+  container_mem_size=75g
+  myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
   docker run -d \
-    --name alluxio-client \
-    --privileged=true \
-    -e ALLUXIO_JAVA_OPTS="-Xmx8g -XX:+UseG1GC " \
-    -e ALLUXIO_FUSE_CACHED_PATHS_MAX=5000 \
-    -e ALLUXIO_USER_BLOCK_MASTER_CLIENT_THREADS=256 \
-    -e ALLUXIO_USER_BLOCK_WORKER_CLIENT_THREADS=256 \
-    -e ALLUXIO_USER_FILE_MASTER_CLIENT_THREADS=156 \
-    -e ALLUXIO_USER_NETWORK_NETTY_WORKER_THREADS=8192 \
-    -e ALLUXIO_USER_FILE_WRITE_TIER_DEFAULT=1 \
-    -e ALLUXIO_USER_FILE_WRITETYPE_DEFAULT=ASYNC_THROUGH \
+    --name alluxio-master \
+    --hostname $myip \
+    --network host \
+    -m ${container_mem_size} \
+    -e ALLUXIO_JAVA_OPTS="-Xms64g -Xmx64g -Xss4m" \
+    -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
+    -e ALLUXIO_MASTER_HOSTNAME=$myip \
+    -e ALLUXIO_MASTER_JOURNAL_FOLDER=/journal \
+    -e ALLUXIO_MASTER_WORKER_TIMEOUT=15min \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
-    -e QINIU_WRITER_HOSTS="192.168.213.50:29899,192.168.213.51:29899,192.168.213.52:29899" \
-    -e QINIU_READER_EX_HOSTS="192.168.213.50:29899,192.168.213.51:29899,192.168.213.52:29899" \
+    -v /alluxio-share/alluxio/journal/:/journal \
+    -v /alluxio-share/alluxio/underStorage/:/underStorage \
+    --restart=always \
     alluxio \
-    proxy
+    master --no-format
 }
 
 remove() {
-  docker rm -f alluxio-client
+  docker rm -f alluxio-master
 }
 
 status() {
-  docker ps -a | grep alluxio-client
-  echo "alluxio-client logs:"
-  docker logs --tail 25 alluxio-client
+  docker ps -a | grep alluxio-master
+  echo "alluxio-master logs:"
+  docker logs --tail 25 alluxio-master
 }
 
 case $cmd in

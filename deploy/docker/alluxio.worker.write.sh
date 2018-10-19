@@ -33,7 +33,7 @@ start() {
     --hostname ${myip} \
     --network host \
     -m ${container_mem_size} \
-    -e ALLUXIO_JAVA_OPTS="-Xms8g -Xmx8g -Xss4m" \
+    -e ALLUXIO_JAVA_OPTS="-Xms8g" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_PORT=${ALLUXIO_WRITE_WORKER_PORT} \
@@ -66,9 +66,9 @@ start() {
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
     -v /mnt/ramdisk-writer:/opt/ramdisk \
-    -v /alluxio-share/alluxio/workers/${myip}/tmp:/tmp \
-    -v /alluxio-share/alluxio/workers/${myip}/cachedisk:/opt/cachedisk \
-    -v /alluxio-share/alluxio/workers/${myip}/underStorage:/underStorage \
+    -v /disk-rbd/alluxio/workers/worker-write/${myip}/tmp:/tmp \
+    -v /disk-rbd/alluxio/workers/worker-write/${myip}/cachedisk:/opt/cachedisk \
+    -v /disk-rbd/alluxio/workers/worker-write/${myip}/underStorage:/underStorage \
     --restart=always \
     alluxio \
     worker --no-format
