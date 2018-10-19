@@ -96,7 +96,7 @@ spec:
         - name: atlab-images
       containers:
       - name: nginx
-        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.8
+        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.12
         ports:
         - containerPort: 80
         resources:
