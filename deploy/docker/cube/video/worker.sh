@@ -1,5 +1,11 @@
 #!/bin/bash
 
+######################################################################
+# worker node list:
+# jq39 jq40 jq41
+######################################################################
+
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cmd=$1
@@ -10,39 +16,41 @@ if [ "$cmd" = "" ]; then
 fi
 
 myip=`ifconfig | grep 'inet addr:192.168.213' | awk -F':' '{print $2}' | awk '{print $1}'`
+group=video
 
 start() {
-  container_mem_size=130g # worker 容器运行时申请的内存上线
-  worker_mem_size=100G
-  ram_tier_size=100G
-  if [ ! -d /mnt/ramdisk ]; then
-    sudo mkdir -p /mnt/ramdisk
-    sudo mount -t ramfs -o size=${ram_tier_size} ramfs /mnt/ramdisk
-    sudo chmod a+w /mnt/ramdisk
-    mkdir -p /mnt/ramdisk/data
+  container_mem_size=24G # worker 容器运行时申请的内存上线
+  worker_mem_size=80G
+  ram_tier_size=80G
+  if [ ! -d /mnt/ramdisk-$group ]; then
+    sudo mkdir -p /mnt/ramdisk-$group
+    sudo mount -t ramfs -o size=${ram_tier_size} ramfs /mnt/ramdisk-$group
+    sudo chmod a+w /mnt/ramdisk-$group
+    mkdir -p /mnt/ramdisk-$group/data
   fi
 
-  mkdir -p /disk1/alluxio/data/cachedisk
-  mkdir -p /disk2/alluxio/data/cachedisk
-  mkdir -p /disk3/alluxio/data/cachedisk
-  mkdir -p /disk4/alluxio/data/cachedisk
-  mkdir -p /disk5/alluxio/data/cachedisk
-  mkdir -p /disk6/alluxio/data/cachedisk
-  mkdir -p /disk2/alluxio/data/underStorage
+  mkdir -p /disk1/alluxio/data-$group/cachedisk
+  mkdir -p /disk2/alluxio/data-$group/cachedisk
+  mkdir -p /disk3/alluxio/data-$group/cachedisk
+  mkdir -p /disk4/alluxio/data-$group/cachedisk
+  mkdir -p /disk5/alluxio/data-$group/cachedisk
 
-  source /alluxio-share/alluxio/env/worker
+  source /disk-cephfs/alluxio/env/worker-$group
 
   docker run -d \
-    --name alluxio-worker \
+    --name alluxio-worker-$group \
     --hostname ${myip} \
     --network host \
     -m ${container_mem_size} \
-    -e ALLUXIO_JAVA_OPTS="-Xms16g" \
+    -e ALLUXIO_JAVA_OPTS="-Xmx8g" \
     -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
     -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
     -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
     -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
+    -e ALLUXIO_WORKER_PORT=${ALLUXIO_WORKER_PORT} \
+    -e ALLUXIO_WORKER_DATA_PORT=${ALLUXIO_WORKER_DATA_PORT} \
+    -e ALLUXIO_WORKER_WEB_PORT=${ALLUXIO_WORKER_WEB_PORT} \
     -e ALLUXIO_WORKER_MEMORY_SIZE=${worker_mem_size} \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=2 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
@@ -51,8 +59,8 @@ start() {
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.7 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.5 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk1,/opt/cachedisk2,/opt/cachedisk3,/opt/cachedisk4,/opt/cachedisk5,/opt/cachedisk6 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=300GB,400GB,1800GB,1800GB,1800GB,1800GB \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk1,/opt/cachedisk2,/opt/cachedisk3,/opt/cachedisk4,/opt/cachedisk5 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=200GB,200GB,200GB,200GB,200GB \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.8 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.7 \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_ENABLED=true \
@@ -64,29 +72,27 @@ start() {
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
-    -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
-    -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
-    -v /mnt/ramdisk:/opt/ramdisk \
-    -v /disk1/alluxio/data/cachedisk:/opt/cachedisk1 \
-    -v /disk2/alluxio/data/cachedisk:/opt/cachedisk2 \
-    -v /disk3/alluxio/data/cachedisk:/opt/cachedisk3 \
-    -v /disk4/alluxio/data/cachedisk:/opt/cachedisk4 \
-    -v /disk5/alluxio/data/cachedisk:/opt/cachedisk5 \
-    -v /disk6/alluxio/data/cachedisk:/opt/cachedisk6 \
-    -v /alluxio-share/alluxio/underStorage:/underStorage \
+    -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/$group \
+    -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/$group \
+    -v /mnt/ramdisk-$group:/opt/ramdisk \
+    -v /disk1/alluxio/data-$group/cachedisk:/opt/cachedisk1 \
+    -v /disk2/alluxio/data-$group/cachedisk:/opt/cachedisk2 \
+    -v /disk3/alluxio/data-$group/cachedisk:/opt/cachedisk3 \
+    -v /disk4/alluxio/data-$group/cachedisk:/opt/cachedisk4 \
+    -v /disk5/alluxio/data-$group/cachedisk:/opt/cachedisk5 \
     --restart=always \
     alluxio \
     worker --no-format
 }
 
 remove() {
-  docker rm -f alluxio-worker
+  docker rm -f alluxio-worker-$group
 }
 
 status() {
-  docker ps -a | grep alluxio-worker
+  docker ps -a | grep alluxio-worker-$group
   echo "alluxio-worker logs:"
-  docker logs --tail 25 alluxio-worker
+  docker logs --tail 25 alluxio-worker-$group
 }
 
 case $cmd in
