@@ -1,7 +1,12 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+. ${DIR}/../common/env.sh
 . ${DIR}/../common/util.sh
+
+if [ -f "${ALLUXIO_ENV}"/cluster ]; then
+  . "${ALLUXIO_ENV}"/cluster
+fi
 
 # GROUP should be set
 if [ "${GROUP}" == "" ]; then
@@ -10,7 +15,7 @@ if [ "${GROUP}" == "" ]; then
 fi
 
 # check if this node is valid for <GROUP>-master
-if ! echo "$NODE_LIST" | grep -wE $(hostname) > /dev/null ; then
+if ! echo "${NODE_LIST}" | grep -wE $(hostname) > /dev/null ; then
   echo -e "${BRed}[FATAL]${NC} $(hostname) is not in master node list" 
   exit 1
 fi
@@ -18,7 +23,7 @@ fi
 cmd=$1
 container_name="alluxio-master-${GROUP}"
 
-if [ "$cmd" = "" ]; then
+if [ "${cmd}" = "" ]; then
   echo "usage: ./alluxio.master.sh <cmd> [options]"
   echo "  where cmd should be one of pull/start/restart/remove/status"
   echo "  options:"
@@ -26,7 +31,8 @@ if [ "$cmd" = "" ]; then
   exit 1
 fi
 
-. /disk-cephfs/alluxio/env/master-"${GROUP}"
+. "${ALLUXIO_ENV}"/cluster
+. "${ALLUXIO_ENV}"/master-"${GROUP}"
 
 jvm_size=48G
 inode_capacity=3000000
@@ -67,7 +73,7 @@ start() {
     -e ALLUXIO_MASTER_INODE_EVICT_RATIO=${inode_evict_ratio} \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
-    -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
+    -e ALLUXIO_ZOOKEEPER_ADDRESS="${ALLUXIO_ZOOKEEPER_ADDRESS}" \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/$GROUP \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/$GROUP \
     -v /disk-cephfs/alluxio/$GROUP/journal/:/journal \

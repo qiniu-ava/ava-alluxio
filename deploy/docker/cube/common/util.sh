@@ -53,7 +53,11 @@ isMacOS() {
 # only apply for Qiniu office WIFI and jq cluster network settings
 getMyIP() {
   if isLinux; then
-    ifconfig | grep -E "^\\s+inet " | grep "192.168." | grep -v "192.168.212" | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
+    if [ "$ALLUXIO_IP_EXCLUDE" ]; then
+      ifconfig | grep -E "^\\s+inet " | grep -- "${ALLUXIO_IP_PREFIX}" | grep -v "${ALLUXIO_IP_EXCLUDE}" | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
+    else
+      ifconfig | grep -E "^\\s+inet " | grep -- "${ALLUXIO_IP_PREFIX}" | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
+    fi
   elif isMacOS; then
     ifconfig | grep -E -A6 "^en0:" | grep -E "^\\s+inet " | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
   else
