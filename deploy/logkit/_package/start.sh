@@ -53,6 +53,11 @@ done
 if  [ "$AK" != "" ] && [ "$SK" != "" ]; then
   sed -i 's/\"ak\": ""/\"ak\": \"'"$AK"'\"/' "$DIR"/logkit.conf
   sed -i 's/\"sk\": ""/\"sk\": \"'"$SK"'\"/' "$DIR"/logkit.conf
+  for file in $DIR/confs/* ; do
+    temp_file=`basename $file`
+    sed -i 's/\"pandora_ak\": \"<pandora_ak>\"/\"pandora_ak\": \"'"$AK"'\"/' $DIR/confs/$temp_file
+    sed -i 's/\"pandora_sk\": \"<pandora_sk>\"/\"pandora_sk\": \"'"$SK"'\"/' $DIR/confs/$temp_file
+  done
   nowdate="$(date --rfc-3339=ns | sed 's/ /T/; s/+.*/Z/')"
   for file in "$DIR"/script/* ; do
     temp_file=$(basename "$file")
