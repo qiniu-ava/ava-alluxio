@@ -2,14 +2,14 @@
 
 ######################################################################
 # master node list:
-# jq39
+# jq54
 ######################################################################
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . ${DIR}/../common/util.sh
 
 cmd=$1
-group=video
+group=video-det
 
 if [ "$cmd" = "" ]; then
   echo "usage: ./alluxio.master.sh <cmd> [options]"

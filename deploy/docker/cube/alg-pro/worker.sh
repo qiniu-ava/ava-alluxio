@@ -2,7 +2,7 @@
 
 ######################################################################
 # worker node list:
-# jq40 jq41 jq42 jq56 jq57
+# jq19
 ######################################################################
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -16,10 +16,11 @@ if [ "$cmd" = "" ]; then
 fi
 
 myip=$(getMyIP)
-group=video
+group=alg-pro
 
 start() {
-  ram_tier_size=80G
+  ram_tier_size=10G
+
   # implements in common/util.sh
   ensureGroupRamdisk $group $ram_tier_size
 
