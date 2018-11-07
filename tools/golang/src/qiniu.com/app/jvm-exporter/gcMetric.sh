@@ -29,13 +29,10 @@ getMetric()
 for docker in $(docker ps | awk '/alluxio/{print $NF}'); do
   case $docker in
     alluxio-master*)
-      getMetric "alluxio-master" "AlluxioMaster"
-    ;;
-    alluxio-worker-writer)
-      getMetric "alluxio-worker-writer" "AlluxioWorker"
+      getMetric "$docker" "AlluxioMaster"
     ;;
     alluxio-worker*)
-      getMetric "alluxio-worker" "AlluxioWorker"
+      getMetric "$docker" "AlluxioWorker"
     ;;
     *)
       # unknown option

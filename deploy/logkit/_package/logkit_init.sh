@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export LOGKIT_VERSION=v1.0.3
+export LOGKIT_VERSION=v1.2.0
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR" || exit
 if [ ! -d "$HOME/logkit/_package/" ];then

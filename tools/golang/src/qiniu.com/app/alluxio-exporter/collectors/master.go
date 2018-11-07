@@ -180,7 +180,7 @@ func (m *MasterCollector) collectorList() []prometheus.Collector {
 func (m *MasterCollector) collect() error {
 	scheme := "http://"
 	host := m.Host
-	path := "/api/v1/master/info"
+	path := "/api/v1/master/info/"
 	method := "GET"
 	URLStr := scheme + host + path
 

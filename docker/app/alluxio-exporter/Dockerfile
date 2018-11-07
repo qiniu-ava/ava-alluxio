@@ -4,5 +4,4 @@ RUN CGO_ENABLED=0 go build -o /go/bin/alluxio-exporter qiniu.com/app/alluxio-exp
 
 FROM alpine:3.8
 COPY --from=builder /go/bin/alluxio-exporter /
-COPY tools/golang/src/qiniu.com/app/alluxio-exporter/exporter.yml /exporter
 ENTRYPOINT [ "/alluxio-exporter" ]

@@ -10,12 +10,13 @@
     - [部署 zookeeper](#%E9%83%A8%E7%BD%B2-zookeeper)
     - [部署 master](#%E9%83%A8%E7%BD%B2-master)
     - [部署 worker](#%E9%83%A8%E7%BD%B2-worker)
-    - [部署 logkit](#%E9%83%A8%E7%BD%B2-logkit)
-      - [logkit config](#logkit-config)
+    - [部署 logkit-pro](#%E9%83%A8%E7%BD%B2-logkit-pro)
+      - [logkit-pro config](#logkit-pro-config)
       - [pandora log download](#pandora-log-download)
     - [部署 cadvisor](#%E9%83%A8%E7%BD%B2-cadvisor)
     - [部署 node-exporter](#%E9%83%A8%E7%BD%B2-node-exporter)
     - [部署 alluxio-exporter](#%E9%83%A8%E7%BD%B2-alluxio-exporter)
+    - [部署 jvm-exporter](#%E9%83%A8%E7%BD%B2-jvm-exporter)
     - [配置 ava-prometheus](#配置-ava-prometheus)
     - [部署 grafana](#%E9%83%A8%E7%BD%B2-grafana)
   - [工具](#%E5%B7%A5%E5%85%B7)
@@ -153,26 +154,33 @@ git pull
 
 5. 依照[下述方式](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)生成 alluxio 包，创建 Jira issue 给 Kirk 组相关同学帮忙更新 k8s 集群中各节点上的 alluxio worker 实例。
 
-### 部署 logkit
+### 部署 logkit-pro
 
-logkit 部署执行步骤如下：
+logkit-pro 部署执行步骤如下：
 
 1. 同部署 zookeeper 中的 *1*
 
 2. 进入 deploy 相关目录，并更新最新代码
 
 ```shell
-cd /alluxio-share/workspace/repos/ava-alluxio/deploy/logkit
+cd /alluxio-share/workspace/repos/ava-alluxio
 git pull
+cd deploy/logkit
 ```
 
-3. 在 jq13 ~ 17, jq19 ~ 21 上，执行 logkit 的初始化脚本logkit_init.sh
+3. 执行 generate_shell_conf.sh 脚本自动生成 logkit 的 runner 配置和 log 读取脚本
+
+```shell
+./generate_shell_conf.sh
+```
+
+3. 执行 logkit 的初始化脚本logkit_init.sh
 
 ```shell
 ./logkit_init.sh
 ```
 
-4. 在 jq13 ~ 17, jq19 ~ 21 上，执行 logkit 的启动脚本start.sh, 启动时需要手动提供有pandora服务AKSK或提供aksk文件路径(文件内容格式见start.sh中的usage帮助)和账号名
+4. 执行 logkit 的启动脚本 start.sh, 启动时需要手动提供有 pandora 服务 AKSK 或提供 aksk 文件路径(文件内容格式见start.sh中的usage帮助)和账号名
 
 ```shell
 cd ~/logkit/_package
@@ -181,15 +189,17 @@ cd ~/logkit/_package
 
 5. 查看logkit日志, 验证服务运行是否成功。日志文件路径在 `logkit.conf` 文件中的 `log` 路径下。
 
-#### logkit config
+#### logkit-pro config
 
 推荐配置姿势:
 
 1. 本机运行命令
 
 ```shell
-wget https://pandora-dl.qiniu.com/logkit_mac_${LOGKIT_VERSION}.tar.gz && tar xvf logkit_mac_${LOGKIT_VERSION}.tar.gz && rm logkit_mac_${LOGKIT_VERSION}.tar.gz
-cd _package_mac/
+wget https://pandora-dl.qiniu.com/logkit-pro-local_mac_${LOGKIT_VERSION}.tar.gz && \
+tar xzvf logkit-pro-local_mac_${LOGKIT_VERSION}.tar.gz && \
+rm logkit-pro-local_mac_${LOGKIT_VERSION}.tar.gz && \
+cd logkit-pro-local_mac_${LOGKIT_VERSION}/
 ```
 
 2. 查看logkit.conf中的bind_host
@@ -197,10 +207,10 @@ cd _package_mac/
 3. 本机运行logkit:
 
 ```shell
-./logkit -f logkit.conf
+./logkit-pro -f logkit.conf
 ```
 
-4. 本机浏览器进入第二步中的bind_host
+4. 本机浏览器进入第二步中的bind_host, 用户名和密码见 auth.conf
 
 5. 点击添加日志收集, 按照网页前端提示, 完成配置, 并以该配置作为模版
 
@@ -229,7 +239,7 @@ python logDownload.py
 
 ### 部署 cadvisor
 
-在 jq13 ~ 17, jq19 ~ 21 上, 执行以下命令:
+执行以下命令:
 
 ```shell
 cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
@@ -250,12 +260,25 @@ cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 暂定在 jq17 上, 执行以下命令:
 
 ```shell
+pip install PyYAML
 cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
-./alluxio-export.sh start/restart
+./alluxio-export.sh start/restart <group_name> <master_ingress or master_host:port>
 ```
 
 补充:
-alluxio-exporter 启动时需要exporter.yml配置文件，其中需要alluxio组件类型和host地址，可参考 `/alluxio-share/workspace/repos/ava-alluxio/tools/golang/qiniu.com/app/alluxio-exporter/exporter.yml`
+
+* alluxio-exporter 启动时需要exporter.yml配置文件，其中需要alluxio组件类型和host地址，可参考 `ava-alluxio/tools/golang/qiniu.com/app/alluxio-exporter/exporter.yml`
+
+* alluxio 容器命名应为 alluxio-master-<group_name> 或 alluxio-worker-<group_name>
+
+### 部署 jvm-exporter
+
+暂定在 jq17 上, 执行以下命令:
+
+```shell
+cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
+./jvm-export.sh start/restart
+```
 
 ### 配置 ava-prometheus
 

@@ -8,13 +8,15 @@ if [ "$cmd" = "" ]; then
 fi
 
 start() {
+  myip=$(ifconfig | grep '100.100.35' | awk '{print $2}')
   docker run \
     --publish=9998:9998 \
     --detach=true \
     --name=jvm-exporter \
     --restart=always \
+    -e HOSTIP="${myip}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    reg-xs.qiniu.io/atlab/jvm-exporter:test
+    reg-xs.qiniu.io/atlab/jvm-exporter:v0.1.0
 }
 
 remove() {
