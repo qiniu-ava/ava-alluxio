@@ -17,7 +17,7 @@
     - [部署 node-exporter](#%E9%83%A8%E7%BD%B2-node-exporter)
     - [部署 alluxio-exporter](#%E9%83%A8%E7%BD%B2-alluxio-exporter)
     - [部署 jvm-exporter](#%E9%83%A8%E7%BD%B2-jvm-exporter)
-    - [配置 ava-prometheus](#配置-ava-prometheus)
+    - [配置 ava-prometheus](#%E9%85%8D%E7%BD%AE-ava-prometheus)
     - [部署 grafana](#%E9%83%A8%E7%BD%B2-grafana)
   - [工具](#%E5%B7%A5%E5%85%B7)
     - [生成 alluxio 包](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)
@@ -73,30 +73,37 @@ cd ./hack/mq
 
 ## 部署
 
-目前 alluxio 服务部署在 jq 机房 jq13 ~ 17 和 jq19 ~ 21 这几台机器，以下约定这几台机器为 `alluxio 机器组`。 alluxio 的 web dashboard 通过 jq-ava 中的 kubernetes 转发以提供外网服务。
+目前 alluxio 服务部署在 jq 机房，以下约定部署了 alluxio 服务的机器为 `alluxio 机器组`。 alluxio 的 web dashboard 通过 jq-k8s 转发以提供外网服务。
 
 **部署前，请先确保你已经申请了 `alluxio 机器组` 的 root 权限。*
 
 ### 前置条件
 
-请先确保在部署的机器上已经安装了 git，并将本代码库 clone 到目标机器。
+请先确保在部署的机器上已经挂载了 cephfs 和 RBD，并安装了 git，将本代码库 clone 到目标机器。
 
 1. 使用 root 账号登录服务器
 
-2. 执行如下命令以安装 git。
+2. 执行如下命令确认是否已经挂载 cephfs 和 RBD
 
-```shell
-apt update && apt install git
+``` shell
+df -h /disk-cephfs # 如果已经挂载则会显示 cephfs 类型的挂载点信息
+df -h /disk-rbd # 如果已经挂载 则会显示 /dev/rbd[0-9] 的块设备已挂载在此挂载点
 ```
 
-3. 克隆本代码库到本机指定位置，请注意克隆前需要将本机的公钥添加到 deploy key 中。
+3. 执行如下命令以安装 git。
 
 ```shell
-mkdir -p /disk1/repos/
-git clone git@github.com:qiniu-ava/ava-alluxio.git /disk1/repos/ava-alluxio
+apt update && apt install -y git
 ```
 
-4. 执行本代码库中 `deploy/env/install.sh` 脚本安装其他必要的依赖并做设置。
+4. 克隆本代码库到本机指定位置，请注意克隆前需要将本机的公钥添加到 deploy key 中。
+
+```shell
+# mkdir -p /disk1/repos/ 已废弃，现在代码放在 /disk-cephfs/workspace/repos/ava-alluxio 下面
+git clone git@github.com:qiniu-ava/ava-alluxio.git /disk-cephfs/workspace/repos/ava-alluxio
+```
+
+5. 执行本代码库中 `deploy/env/install.sh` 脚本安装其他必要的依赖并做设置。
 
 ### 部署 zookeeper
 
@@ -107,7 +114,7 @@ git clone git@github.com:qiniu-ava/ava-alluxio.git /disk1/repos/ava-alluxio
 2. 进入 deploy 相关目录，并更新最新代码
 
 ```shell
-cd /disk1/repos/ava-alluxio/deploy/docker
+cd /disk-cephfs/workspace/repos/ava-alluxio/deploy/docker
 git pull
 ```
 
@@ -119,7 +126,7 @@ git pull
 
 ### 部署 master
 
-在确保上述 zookeeper 部署成功后，可在 `alluxio 机器组` 任意三个以上(最好是奇数)节点上部署 master 实例。分别在需要部署 master 实例的服务器上执行如下步骤:
+在确保上述 zookeeper 部署成功后，可在 `alluxio 机器组` 节点上部署分组 master 的实例。分别在需要部署此分组 master 实例的服务器上执行如下步骤:
 
 1. 同部署 zookeeper 中的 *1*。
 
@@ -128,31 +135,32 @@ git pull
 3. 执行 master 的部署脚本或者更新脚本
 
 ```shell
-./alluxio.master.sh start/restart
+./<group_name>/master.sh start/restart
 ```
 
 ### 部署 worker
 
-在确保上述 zookeeper 部署成功后，可在 `alluxio 机器组` 任意节点上部署 worker 实例。分别在需要部署 worker 实例的服务器上执行如下步骤:
+在确保上述 zookeeper 部署成功后，可在 `alluxio 机器组` 节点上部署分组 worker 实例。分别在需要部署此分组 worker 实例的服务器上执行如下步骤:
 
 1. 同部署 zookeeper 中的 *1*
 
 2. 同部署 zookeeper 中的 *2*
 
-3. 在 jq13 ~ 17 上，执行 worker 的部署脚本或者更新脚本
+3. 在 <group_name>/worker.sh 脚本中声明的机器节点上，执行 worker 的部署脚本或者更新脚本
 
 ```shell
-./alluxio.worker.sh start/restart
+./<group_name>/worker.sh start/restart
 ```
 
-4. 在 jq19 ~ 21 上，执行读 worker 和写 worker 的部署脚本或者更新脚本
+4. 在 <group_name>/worker-write.sh 脚本中声明的机器节点上，执行写 worker 的部署脚本或者更新脚本
 
 ```shell
-./alluxio.worker.fat.sh start/restart
-./alluxio.worker.write.sh start/restart
+./<group_name>/worker-write.sh start/restart
 ```
 
-5. 依照[下述方式](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)生成 alluxio 包，创建 Jira issue 给 Kirk 组相关同学帮忙更新 k8s 集群中各节点上的 alluxio worker 实例。
+5. 依照[下述方式](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)生成 alluxio 包，创建 Jira issue 给 Kirk 组相关同学帮忙更新 k8s 集群中各节点上的 alluxio worker 实例
+
+6. 如果有新增分组或者减少分组，需要更新 alluxio dashboard 的代理服务。
 
 ### 部署 logkit-pro
 
