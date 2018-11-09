@@ -1,13 +1,13 @@
 #!/bin/bash
 
 ######################################################################
-# master node list:
-# jq17
+# worker node list:
+# jq56 jq57
 ######################################################################
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export GROUP=alg-pro
-export NODE_LIST="jq17"
+export GROUP=video-det
+export NODE_LIST="jq56 jq57"
 
-${DIR}/../template/master.sh "$@"
+${DIR}/../template/worker.write.sh "$@"

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+BYellow='\033[1;33m'
+BRed='\033[1;31m'
+NC="\033[0m"
+
+echo -e "${BYellow}[WARNING]${NC} this script is ${BRed}Depricated${NC}, please refer to README"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cmd=$1
