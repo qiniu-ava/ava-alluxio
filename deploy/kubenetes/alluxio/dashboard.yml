@@ -10,7 +10,7 @@ spec:
       paths:
       - backend:
           serviceName: alluxio-dashboard
-          servicePort: 80
+          servicePort: 8080
         path: /
 ---
 apiVersion: extensions/v1beta1
@@ -25,7 +25,7 @@ spec:
       paths:
       - backend:
           serviceName: alluxio-dashboard
-          servicePort: 80
+          servicePort: 8080
         path: /
 ---
 apiVersion: extensions/v1beta1
@@ -40,7 +40,7 @@ spec:
       paths:
       - backend:
           serviceName: alluxio-dashboard
-          servicePort: 80
+          servicePort: 8080
         path: /
 ---
 apiVersion: extensions/v1beta1
@@ -55,7 +55,7 @@ spec:
       paths:
       - backend:
           serviceName: alluxio-dashboard
-          servicePort: 80
+          servicePort: 8080
         path: /
 ---
 apiVersion: extensions/v1beta1
@@ -70,7 +70,7 @@ spec:
       paths:
       - backend:
           serviceName: alluxio-dashboard
-          servicePort: 80
+          servicePort: 8080
         path: /
 ---
 apiVersion: v1
@@ -82,7 +82,7 @@ metadata:
     app: alluxio-dashboard
 spec:
   ports:
-  - port: 80
+  - port: 8080
     name: web
   clusterIP: None
   selector:
@@ -128,7 +128,7 @@ spec:
       - name: nginx
         image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.13
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         resources:
           requests:
             cpu: 0.1
