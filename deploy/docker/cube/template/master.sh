@@ -31,6 +31,7 @@ fi
 jvm_size=48G
 inode_capacity=3000000
 inode_evict_ratio=80
+startup_check_consistency=false
 
 if [ "${MASTER_JVM_SIZE}" != "" ]; then
   jvm_size=${MASTER_JVM_SIZE}
@@ -44,6 +45,10 @@ if [ "${MASTER_INODE_EVICT_RATIO}" != "" ]; then
   inode_evict_ratio=${MASTER_INODE_EVICT_RATIO}
 fi
 
+if [ "${MASTER_STARTUP_CONSISTENCY_CHECK}" != "" ]; then
+  startup_check_consistency=${MASTER_STARTUP_CONSISTENCY_CHECK}
+fi
+
 start() {
   myip=$(getMyIP)
   docker run -d \
@@ -55,7 +60,7 @@ start() {
     -e ALLUXIO_MASTER_HOSTNAME=$myip \
     -e ALLUXIO_MASTER_UFS_PATH_CACHE_THREADS=0 \
     -e ALLUXIO_MASTER_JOURNAL_FOLDER=/journal \
-    -e ALLUXIO_MASTER_STARTUP_CONSISTENCY_CHECK_ENABLED=false \
+    -e ALLUXIO_MASTER_STARTUP_CONSISTENCY_CHECK_ENABLED=${startup_check_consistency} \
     -e ALLUXIO_MASTER_JOURNAL_CHECKPOINT_PERIOD_ENTRIES=500000 \
     -e ALLUXIO_MASTER_STARTUP_BLOCK_INTEGRITY_CHECK_ENABLED=true \
     -e ALLUXIO_MASTER_INODE_CAPACITY=${inode_capacity} \
