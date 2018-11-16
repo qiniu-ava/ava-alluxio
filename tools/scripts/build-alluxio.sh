@@ -19,6 +19,8 @@
 
 set -e
 
+ALLUXIO_VERSION="1.8.1-SNAPSHOT"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR/../..
 
@@ -71,7 +73,7 @@ if [ $build_tarball != "false" ]; then
     tar xf alluxio-"${alluxio_version}".tar.gz && \
     rm alluxio-"${alluxio_version}".tar.gz && \
     cd .. && \
-    cp alluxio/alluxio-"${alluxio_version}"/lib/alluxio-underfs-oss-1.8.1-SNAPSHOT.jar ./temp/ && \
+    cp alluxio/alluxio-"${alluxio_version}"/lib/alluxio-underfs-oss-${ALLUXIO_VERSION}.jar ./temp/ && \
     cd temp/kodo/ && \
     jar xf ../alluxio-underfs-oss-"${alluxio_version}".jar
   cd $DIR/../.. && \
@@ -92,7 +94,7 @@ if [ $build_kodo != "false" ]; then
   cd $DIR/../../.tmp/temp/kodo && \
     rm -f alluxio-underfs-oss-"${alluxio_version}".jar && \
     jar -cf alluxio-underfs-oss-"${alluxio_version}".jar . && \
-    mv ./alluxio-underfs-oss-"${alluxio_version}".jar $DIR/../../.tmp/alluxio/alluxio-1.8.1-SNAPSHOT/lib/ && \
+    mv ./alluxio-underfs-oss-"${alluxio_version}".jar $DIR/../../.tmp/alluxio/alluxio-${ALLUXIO_VERSION}/lib/ && \
     cd $DIR/../.. && \
     cp $DIR/docker-image/kodo-libs/* .tmp/alluxio/alluxio-"${alluxio_version}"/lib/ && \
     echo -e "\n\n\n"
@@ -100,6 +102,19 @@ else
   echo -e "skip building kodo sdk\n\n\n"
 fi
 
+###########################################################################
+# build alluxio client tarball
+###########################################################################
+cd $DIR/../..
+cd .tmp/alluxio/alluxio-${ALLUXIO_VERSION}
+cp ../../../deploy/env/alluxio-flex-volume.sh ./ && cp ../../../deploy/env/client/alluxio-* ./conf
+cd ../
+if git describe --exact-match --tags $(git rev-parse --short=7 HEAD); then
+  tag=`git describe --exact-match --tags $(git rev-parse --short=7 HEAD)` && tar zcvf ${tag}.tar.gz ./alluxio-${ALLUXIO_VERSION}
+else
+  tag=`git rev-parse --short=7 HEAD` && tar zcvf ava-alluxio-${tag}.tar.gz ./alluxio-${ALLUXIO_VERSION}
+fi
+cd $DIR/../..
 
 ########################################################################### 
 # build docker image
