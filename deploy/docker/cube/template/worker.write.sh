@@ -23,6 +23,8 @@ if [ "$cmd" = "" ]; then
   exit 1
 fi
 
+. /disk-cephfs/alluxio/env/worker-${GROUP}
+
 myip=$(getMyIP)
 
 jvm_size=8G
@@ -67,8 +69,6 @@ start() {
   mkdir -p /disk-rbd/alluxio/workers/worker-write-"${GROUP}"/${myip}/tmp
   mkdir -p /disk-rbd/alluxio/workers/worker-write-"${GROUP}"/${myip}/cachedisk
   mkdir -p /disk-rbd/alluxio/workers/worker-write-"${GROUP}"/${myip}/underStorage
-
-  . /disk-cephfs/alluxio/env/worker-"${GROUP}"
 
   docker run -d \
     --name $container_name \

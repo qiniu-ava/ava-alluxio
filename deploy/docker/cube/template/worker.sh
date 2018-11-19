@@ -23,6 +23,8 @@ if [ "$cmd" = "" ]; then
   exit 1
 fi
 
+. /disk-cephfs/alluxio/env/worker-${GROUP}
+
 myip=$(getMyIP)
 
 jvm_size=8G
@@ -77,8 +79,6 @@ start() {
   path_str=$(gen_path_str_from_ssd_list ${ssd})
   # 200GB,200GB,200GB,200GB,200GB
   quota_str=$(gen_quota_str_from_ssd_list ${ssd})
-
-  . /disk-cephfs/alluxio/env/worker-${GROUP}
 
   docker run -d \
     --name alluxio-worker-${GROUP} \
