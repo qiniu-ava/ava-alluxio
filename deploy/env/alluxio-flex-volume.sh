@@ -15,6 +15,32 @@ print_usage() {
   exit 1
 }
 
+is_linux() {
+  test $(uname -s) = "Linux"
+  return $?
+}
+
+is_macos() {
+  test $(uname -s) = "Darwin"
+  return $?
+}
+
+# now we only consider ubuntu distribution
+get_my_ip() {
+  if is_linux; then
+    if [[ $(ifconfig | grep -E "^\\s+inet " | grep -c "192.168.") -lt 2 ]]; then
+      ifconfig | grep -E "^\\s+inet " | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
+    else
+      ifconfig | grep -E "^\\s+inet " | grep "192.168." | grep -v "192.168.212" | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
+    fi
+  elif is_macos; then
+    ifconfig | grep -E -A6 "^en0:" | grep -E "^\\s+inet " | grep -o -E  '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | head -n 1
+  else
+    echo "not compatible OS"
+    return 1
+  fi
+}
+
 acquire_configure() {
   while [ -f "${CONFIGURE_LOCK}" ]; do
     sleep 1
@@ -22,6 +48,7 @@ acquire_configure() {
 
   cp "$CUR_DIR/conf/alluxio-env-$1.sh" "$CUR_DIR/conf/alluxio-env.sh"
   cp "$CUR_DIR/conf/alluxio-site-$1.properties" "$CUR_DIR/conf/alluxio-site.properties"
+  echo "alluxio.locality.node=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
 
   echo "this file is somelike a lock for alluxio configures" > "${CONFIGURE_LOCK}"
 }
