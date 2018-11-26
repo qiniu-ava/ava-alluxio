@@ -49,6 +49,7 @@ acquire_configure() {
   cp "$CUR_DIR/conf/alluxio-env-$1.sh" "$CUR_DIR/conf/alluxio-env.sh"
   cp "$CUR_DIR/conf/alluxio-site-$1.properties" "$CUR_DIR/conf/alluxio-site.properties"
   echo "alluxio.locality.node=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
+  echo "alluxio.user.hostname=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
 
   echo "this file is somelike a lock for alluxio configures" > "${CONFIGURE_LOCK}"
 }
