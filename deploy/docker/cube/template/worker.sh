@@ -28,9 +28,7 @@ fi
 myip=$(getMyIP)
 
 jvm_size=8G
-ram_tier_size=40G
-ram_tier_high=0.7
-ram_tier_low=0.5
+local container_mem_size
 ssd_tier_high=0.8
 ssd_tier_low=0.7
 
@@ -38,17 +36,7 @@ if [ "${WORKER_JVM_SIZE}" != "" ]; then
   jvm_size=${WORKER_JVM_SIZE}
 fi
 
-if [ "${WORKER_RAM_TIER_SIZE}" != "" ]; then
-  ram_tier_size=${WORKER_RAM_TIER_SIZE}
-fi
-
-if [ "${WORKER_RAM_TIER_HIGHT}" != "" ]; then
-  ram_tier_high=${WORKER_RAM_TIER_HIGHT}
-fi
-
-if [ "${WORKER_RAM_TIER_LOW}" != "" ]; then
-  ram_tier_low=${WORKER_RAM_TIER_LOW}
-fi
+container_mem_size=$(get_container_mem_size_from_jvm_size ${jvm_size})
 
 if [ "${WORKER_SSD_TIER_HIGHT}" != "" ]; then
   ssd_tier_high=${WORKER_SSD_TIER_HIGHT}
@@ -60,7 +48,7 @@ fi
 
 start() {
   # implements in common/util.sh
-  ensureGroupRamdisk ${GROUP} $ram_tier_size
+  # ensureGroupRamdisk ${GROUP} $ram_tier_size
 
   ssd=$(getAvailableSSD)
 
@@ -84,27 +72,20 @@ start() {
     --name alluxio-worker-${GROUP} \
     --hostname ${myip} \
     --network host \
+    -m ${container_mem_size} \
     -e ALLUXIO_JAVA_OPTS="-Xmx${jvm_size} -XX:+UseG1GC " \
-    -e ALLUXIO_UNDERFS_ADDRESS=/underStorage \
-    -e ALLUXIO_RAM_FOLDER=/opt/ramdisk \
     -e ALLUXIO_WORKER_BLOCK_MASTER_CLIENT_POOL_SIZE=256 \
     -e KODO_IO_ORIGHOST=${KODO_IO_ORIGHOST} \
     -e KODO_UP_ORIGHOST=${KODO_UP_ORIGHOST} \
     -e ALLUXIO_WORKER_PORT=${ALLUXIO_WORKER_PORT} \
     -e ALLUXIO_WORKER_DATA_PORT=${ALLUXIO_WORKER_DATA_PORT} \
     -e ALLUXIO_WORKER_WEB_PORT=${ALLUXIO_WORKER_WEB_PORT} \
-    -e ALLUXIO_WORKER_MEMORY_SIZE=${ram_tier_size} \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=2 \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=MEM \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH=/opt/ramdisk \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA=${ram_tier_size} \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=${ram_tier_high} \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=${ram_tier_low} \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH="${path_str}" \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA="${quota_str}" \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=${ssd_tier_high} \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=${ssd_tier_low} \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVELS=1 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_ALIAS=SSD \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_PATH="${path_str}" \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_DIRS_QUOTA="${quota_str}" \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=${ssd_tier_high} \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=${ssd_tier_low} \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_ENABLED=true \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_INTERVAL=10000 \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
@@ -112,7 +93,6 @@ start() {
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/${GROUP} \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/${GROUP} \
-    -v /mnt/ramdisk-${GROUP}:/opt/ramdisk \
     ${volume_str} \
     --restart=always \
     alluxio-${GROUP} \

@@ -181,3 +181,19 @@ gen_quota_str_from_ssd_list() {
   fi
   echo $(join , $(for disk in "$@"; do echo $(getSSDAvailableQuota "${disk}")GB; done))
 }
+
+# only apply for unit in G
+get_container_mem_size_from_jvm_size() {
+  if [ $# -eq 1 ]; then
+    if [ $(echo $1 | grep -cE "^\s*[0-9]+(G|g)i{0,1}\s*$") -eq 1 ]; then
+      n=$(echo $1 | grep -oE "[0-9]+")
+      echo $(printf "%.0f\n" $(echo "${n}*1.25+0.5" | bc))"G"
+    else
+      echo "invalid arguments $@ to get container mem size"
+      exit 2
+    fi
+  else
+    echo "invalid arguments $@ to get container mem size"
+    exit 1
+  fi
+}
