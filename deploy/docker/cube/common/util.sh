@@ -20,7 +20,7 @@ export BWhite='\033[1;37m'       # White
 
 
 # max read workers in same node
-export MAX_READ_WORKER_PER_NODE=4
+export MAX_READ_WORKER_PER_NODE=3
 
 join(){
     # If no arguments, do nothing.
@@ -123,11 +123,7 @@ getSSDAvailableQuota() {
     fi
   } &> /dev/null
 
-  if [ "$1" = "/disk1" ]; then
-    echo $(echo "${origin_size}*0.8/(2*${MAX_READ_WORKER_PER_NODE})" | bc | awk -F'.' '{print $1}')
-  else
-    echo $(echo "${origin_size}*0.8/${MAX_READ_WORKER_PER_NODE}" | bc | awk -F'.' '{print $1}')
-  fi
+  echo $(echo "${origin_size}*0.8/${MAX_READ_WORKER_PER_NODE}" | bc | awk -F'.' '{print $1}')
 }
 
 # input:
