@@ -180,6 +180,12 @@ gen_quota_str_from_ssd_list() {
 
 # only apply for unit in G
 get_container_mem_size_from_jvm_size() {
+  {
+    if ! which bc; then
+      apt update
+      apt install -y bc
+    fi
+  } &> /dev/null
   if [ $# -eq 1 ]; then
     if [ $(echo $1 | grep -cE "^\s*[0-9]+(G|g)i{0,1}\s*$") -eq 1 ]; then
       n=$(echo $1 | grep -oE "[0-9]+")
