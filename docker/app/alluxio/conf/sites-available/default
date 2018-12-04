@@ -54,3 +54,10 @@ server {
                 proxy_pass http://video-det;
         }
 }
+server {
+        listen 8080;
+        server_name alluxio-dashboard-terror.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://terror;
+        }
+}

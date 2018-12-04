@@ -61,6 +61,21 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  name: alluxio-master-terror-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-dashboard-terror.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-dashboard
+          servicePort: 8080
+        path: /
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
   name: alluxio-proxy
   namespace: ava
 spec:
@@ -126,7 +141,7 @@ spec:
         - name: atlab-images
       containers:
       - name: nginx
-        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.13
+        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.19
         ports:
         - containerPort: 8080
         resources:
