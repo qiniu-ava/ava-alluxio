@@ -2,12 +2,12 @@
 
 ######################################################################
 # worker node list:
-# jq65 jq66
+# jq67 jq68
 ######################################################################
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export GROUP=terror
-export NODE_LIST="jq65 jq66"
+export GROUP=general-reg
+export NODE_LIST="jq67 jq68"
 
 ${DIR}/../template/worker.write.sh "$@"

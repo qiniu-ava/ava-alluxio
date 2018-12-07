@@ -54,10 +54,35 @@ server {
                 proxy_pass http://video-det;
         }
 }
+
 server {
         listen 8080;
         server_name alluxio-dashboard-terror.ava-prd.kegate-jq.cloudappl.com;
         location / {
                 proxy_pass http://terror;
+        }
+}
+
+server {
+        listen 8080;
+        server_name alluxio-dashboard-blademaster.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://blademaster;
+        }
+}
+
+server {
+        listen 8080;
+        server_name alluxio-dashboard-general-reg.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://general-reg;
+        }
+}
+
+server {
+        listen 8080;
+        server_name alluxio-dashboard-ocr.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://ocr;
         }
 }

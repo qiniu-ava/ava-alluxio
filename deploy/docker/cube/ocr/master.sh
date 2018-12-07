@@ -1,13 +1,13 @@
 #!/bin/bash
 
 ######################################################################
-# worker node list:
-# jq65 jq66
+# master node list:
+# jq73
 ######################################################################
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export GROUP=terror
-export NODE_LIST="jq65 jq66"
+export GROUP=ocr
+export NODE_LIST="jq73"
 
-${DIR}/../template/worker.write.sh "$@"
+${DIR}/../template/master.sh "$@"
