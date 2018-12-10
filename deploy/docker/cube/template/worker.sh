@@ -88,6 +88,7 @@ start() {
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=${ssd_tier_low} \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_ENABLED=true \
     -e ALLUXIO_WORKER_TIEREDSTORE_RESERVER_INTERVAL=10000 \
+    -e ALLUXIO_WORKER_ROLE=READ \
     -e ALLUXIO_CLASSPATH=/opt/alluxio/lib/gson-2.2.4.jar:/opt/alluxio/lib/qiniu-java-sdk-7.2.11.jar:/opt/alluxio/lib/okhttp-3.10.0.jar:/opt/alluxio/lib/okio-1.14.0.jar:/opt/alluxio/lib/jackson-databind-2.9.5.jar:/opt/alluxio/lib/jackson-core-2.9.5.jar:/opt/alluxio/lib/jackson-annotations-2.9.5.jar \
     -e ALLUXIO_ZOOKEEPER_ENABLED=true \
     -e ALLUXIO_ZOOKEEPER_ADDRESS=192.168.213.42:2181,192.168.213.45:2181,192.168.213.46:2181 \
