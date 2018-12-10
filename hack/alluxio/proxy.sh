@@ -19,5 +19,8 @@ docker run -d \
   -e ALLUXIO_MASTER_HOSTNAME="$myip" \
   -e ALLUXIO_PROXY_WEB_PORT="${ALLUXIO_PROXY_WEB_PORT}" \
   -p "${ALLUXIO_PROXY_WEB_PORT}":"${ALLUXIO_PROXY_WEB_PORT}" \
+  -v "${ALLUXIO_WORKER_SSD_DISK}":/opt/cachedisk-read \
+  -v "${ALLUXIO_WRITE_WORKER_SSD_DISK}":/opt/cachedisk-write \
+  --restart=always \
   alluxio \
   proxy
