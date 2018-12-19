@@ -28,7 +28,7 @@ fi
 myip=$(getMyIP)
 
 jvm_size=8G
-local container_mem_size
+container_mem_size
 ssd_tier_high=0.8
 ssd_tier_low=0.7
 
