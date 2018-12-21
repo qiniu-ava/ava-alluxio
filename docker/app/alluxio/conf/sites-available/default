@@ -86,3 +86,11 @@ server {
                 proxy_pass http://ocr;
         }
 }
+
+server {
+        listen 8080;
+        server_name alluxio-dashboard-group-ava.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://group-ava;
+        }
+}
