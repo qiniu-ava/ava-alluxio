@@ -94,3 +94,11 @@ server {
                 proxy_pass http://group-ava;
         }
 }
+
+server {
+        listen 8080;
+        server_name alluxio-dashboard-face.ava-prd.kegate-jq.cloudappl.com;
+        location / {
+                proxy_pass http://face;
+        }
+}
