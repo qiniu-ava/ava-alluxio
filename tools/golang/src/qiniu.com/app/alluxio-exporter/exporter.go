@@ -21,6 +21,7 @@ type AlluxioExporter struct {
 var _ prometheus.Collector = &AlluxioExporter{}
 
 func NewAlluxioExporter() *AlluxioExporter {
+
 	return &AlluxioExporter{}
 }
 
@@ -41,34 +42,38 @@ func (a *AlluxioExporter) Collect(ch chan<- prometheus.Metric) {
 
 func main() {
 	var (
-		addr           = flag.String("telemetry.addr", ":9999", "host:port for alluxio exporter")
+		addr           = flag.String("telemetry.addr", ":9996", "host:port for alluxio exporter")
 		metricsPath    = flag.String("telemetry.path", "/metrics", "URL path for surfacing collected metrics")
-		exporterConfig = flag.String("exporter.config", "/exporter.yml", "Path to alluxio exporter config.")
+		exporterConfig = flag.String("exporter.config", "/conf/exporter.yml", "Path to alluxio exporter config.")
 	)
 	flag.Parse()
-
+	log.Printf("parse the file ",*exporterConfig)
 	exporter := NewAlluxioExporter()
 	if fileExists(*exporterConfig) {
+
 		cfg, err := ParseConfig(*exporterConfig)
 		if err != nil {
 			log.Fatalf("Error: %v", err)
 		}
-
+		log.Printf("parse the file")
 		for _, alluxio := range cfg.Alluxio {
-			switch alluxio.AlluxioType {
-			case "worker", "worker-writer":
+			group := alluxio.Name
+			log.Printf("Group name is :",group)
+			exporter.collectors = append(exporter.collectors,
+				collectors.NewMasterCollector(alluxio.Master_host,group))
+			log.Printf("Master collecter !")
+			for _, worker := range alluxio.Worker_host{
 				exporter.collectors = append(exporter.collectors,
-					collectors.NewWorkerCollector(alluxio.AlluxioWebHost))
-			default:
-				exporter.collectors = append(exporter.collectors,
-					collectors.NewMasterCollector(alluxio.AlluxioWebHost))
+					collectors.NewWorkerCollector(worker,group))
+			log.Printf("Worker collecter !")
 			}
 		}
-	} else {
+	}else {
+		log.Printf("file do not exist !")
 		exporter.collectors = append(exporter.collectors,
-			collectors.NewWorkerCollector("127.0.0.1:30000"))
+			collectors.NewWorkerCollector("127.0.0.1:30000","default-group"))
 		exporter.collectors = append(exporter.collectors,
-			collectors.NewMasterCollector("127.0.0.1:19999"))
+			collectors.NewMasterCollector("127.0.0.1:19999","default-group"))
 	}
 	prometheus.MustRegister(exporter)
 	http.Handle(*metricsPath, promhttp.Handler())
