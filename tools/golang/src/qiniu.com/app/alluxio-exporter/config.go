@@ -10,8 +10,9 @@ import (
 )
 
 type AlluxioConfig struct {
-	AlluxioType    string `yaml:"type"`
-	AlluxioWebHost string `yaml:"host"`
+	Master_host    string `yaml:"master_host"`
+	Name           string `yaml:"name"`
+	Worker_host  []string `yaml:"worker_host"`
 }
 
 // Config is the top-level configuration for Metastord.

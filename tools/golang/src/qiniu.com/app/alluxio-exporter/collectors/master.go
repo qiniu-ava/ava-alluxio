@@ -44,9 +44,9 @@ type MasterCollector struct {
 	UFSCapacityUsed prometheus.Gauge
 }
 
-func NewMasterCollector(host string) *MasterCollector {
+func NewMasterCollector(host string, group string ) *MasterCollector {
 	labels := make(prometheus.Labels)
-	labels["endpoint"] = "alluxio-export"
+	labels["group"] = group
 
 	return &MasterCollector{
 		Host: host,

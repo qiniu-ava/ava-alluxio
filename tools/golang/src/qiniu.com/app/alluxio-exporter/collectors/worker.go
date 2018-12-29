@@ -29,10 +29,10 @@ type WorkerCollector struct {
 	WorkerMetrics *prometheus.GaugeVec
 }
 
-func NewWorkerCollector(workerAddress string) *WorkerCollector {
+func NewWorkerCollector(workerAddress string, group string) *WorkerCollector {
 	labels := make(prometheus.Labels)
 	labels["instance"] = workerAddress
-	labels["endpoint"] = "alluxio-export"
+	labels["group"] = group
 
 	return &WorkerCollector{
 		instance: workerAddress,
@@ -117,6 +117,7 @@ func (w *WorkerCollector) collect() error {
 
 	res, e := HTTPRequest(URLStr, method, nil, nil)
 	if e != nil {
+		log.Println("[INFO] URLStr is : ",URLStr)
 		log.Println("[ERROR] HTTPRequest for worker:"+w.instance+" failed: ", e)
 		return e
 	}
