@@ -23,13 +23,13 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /conf
-        - name: my-pvc  
-          mountPath: /my-pvc   
+        - name: pvc-volume  
+          mountPath: /alluxio-monitor-pvc   
       volumes:
       - name: config-volume
         configMap:
           name: alluxio-exporter-config
-      - name: my-pvc
+      - name: pvc-volume
         persistentVolumeClaim:
           claimName: alluxio-exporter
       

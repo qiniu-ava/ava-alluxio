@@ -286,12 +286,12 @@ cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 1. 维护分组信息文件 `alluxio-exporter.yml`。将其创建为一个`configmap`，并且将该configmap挂载到pod上。
 
 ```shell
-kubectl create configmap <alluxio-exporter-config> --from-file=<alluxio-exporter.yml分组信息文件所在的地址> #创建configmap
+kubectl create configmap alluxio-exporter-config --from-file=./deploy/monitor/alluxio-exporter.yml #创建configmap
 ```
 2. 启动pod
 
 ```shell
-kubectl create -f <deployment.yml>
+kubectl create -f ./deploy/monitor/deployment.yml
 ```
 
 ### 部署 jvm-exporter
@@ -315,7 +315,7 @@ cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 2. `ServiceMonitor` 可以选多个 `Service`，通过一个共同的 `label` 就可以了，实际抓取的是 `Service` 后面对应的 `Endpoints`
 
 ### 多分组情况下配置 ava-prometheus
-对于alluxio exporter, 相对于以上的`Endpoints + Service +ServiceMonitor`配置方式，不同之处在于：把配置方式改变为：`Deployment + Service + ServiceMonitor`。在alluxio exporter中采集各个分组的metric，并且以pod的形式启动。所需的Deployment + Service + ServiceMonitor配置文件均放在deploy/monitor路径下。
+对于alluxio exporter, 相对于以上的`Endpoints + Service + ServiceMonitor`配置方式，不同之处在于：把配置方式改变为：`Deployment + Service + ServiceMonitor`。在alluxio exporter中采集各个分组的metric，并且以pod的形式启动。所需的Deployment + Service + ServiceMonitor配置文件均放在deploy/monitor路径下。
 
 
 ### 部署 grafana
