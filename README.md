@@ -1,31 +1,33 @@
 <!-- TOC -->
 
 - [ava-alluxio](#ava-alluxio)
-  - [前置文档](#%E5%89%8D%E7%BD%AE%E6%96%87%E6%A1%A3)
-  - [本地开发](#%E6%9C%AC%E5%9C%B0%E5%BC%80%E5%8F%91)
-    - [avio server](#avio-server)
-    - [avio](#avio)
-  - [部署](#%E9%83%A8%E7%BD%B2)
-    - [前置条件](#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6)
-    - [部署 zookeeper](#%E9%83%A8%E7%BD%B2-zookeeper)
-    - [部署 master](#%E9%83%A8%E7%BD%B2-master)
-    - [部署 worker](#%E9%83%A8%E7%BD%B2-worker)
-    - [部署 logkit-pro](#%E9%83%A8%E7%BD%B2-logkit-pro)
-      - [logkit-pro config](#logkit-pro-config)
-      - [pandora log download](#pandora-log-download)
-    - [部署 cadvisor](#%E9%83%A8%E7%BD%B2-cadvisor)
-    - [部署 node-exporter](#%E9%83%A8%E7%BD%B2-node-exporter)
-    - [部署 alluxio-exporter](#%E9%83%A8%E7%BD%B2-alluxio-exporter)
-    - [部署 jvm-exporter](#%E9%83%A8%E7%BD%B2-jvm-exporter)
-    - [配置 ava-prometheus](#%E9%85%8D%E7%BD%AE-ava-prometheus)
-    - [部署 grafana](#%E9%83%A8%E7%BD%B2-grafana)
-  - [工具](#%E5%B7%A5%E5%85%B7)
-    - [生成 alluxio 包](#%E7%94%9F%E6%88%90-alluxio-%E5%8C%85)
-    - [生成 alluxio 镜像](#%E7%94%9F%E6%88%90-alluxio-%E9%95%9C%E5%83%8F)
-    - [alluxio 批量加载工具 avio](#alluxio-%E6%89%B9%E9%87%8F%E5%8A%A0%E8%BD%BD%E5%B7%A5%E5%85%B7-avio)
-      - [生成 avio 二进制包](#%E7%94%9F%E6%88%90-avio-%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%8C%85)
-      - [发布 avio 新版本](#%E5%8F%91%E5%B8%83-avio-%E6%96%B0%E7%89%88%E6%9C%AC)
-  - [帮助](#%E5%B8%AE%E5%8A%A9)
+    - [前置文档](#前置文档)
+    - [本地开发](#本地开发)
+        - [avio server](#avio-server)
+        - [avio](#avio)
+    - [部署](#部署)
+        - [前置条件](#前置条件)
+        - [部署 zookeeper](#部署-zookeeper)
+        - [部署 master](#部署-master)
+        - [部署 worker](#部署-worker)
+        - [部署 logkit-pro](#部署-logkit-pro)
+            - [logkit-pro config](#logkit-pro-config)
+            - [pandora log download](#pandora-log-download)
+        - [部署 cadvisor](#部署-cadvisor)
+        - [部署 node-exporter](#部署-node-exporter)
+        - [部署 alluxio-exporter(deprecated)](#部署-alluxio-exporterdeprecated)
+        - [多分组情况下部署 alluxio-exporter](#多分组情况下部署-alluxio-exporter)
+        - [部署 jvm-exporter](#部署-jvm-exporter)
+        - [配置 ava-prometheus](#配置-ava-prometheus)
+        - [多分组情况下配置 ava-prometheus](#多分组情况下配置-ava-prometheus)
+        - [部署 grafana](#部署-grafana)
+    - [工具](#工具)
+        - [生成 alluxio 包](#生成-alluxio-包)
+        - [生成 alluxio 镜像](#生成-alluxio-镜像)
+        - [alluxio 批量加载工具 avio](#alluxio-批量加载工具-avio)
+            - [生成 avio 二进制包](#生成-avio-二进制包)
+            - [发布 avio 新版本](#发布-avio-新版本)
+    - [帮助](#帮助)
 
 <!-- /TOC -->
 
@@ -263,7 +265,7 @@ cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 ./node-export.sh start/restart
 ```
 
-### 部署 alluxio-exporter
+### 部署 alluxio-exporter(deprecated)
 
 暂定在 jq17 上, 执行以下命令:
 
@@ -278,6 +280,19 @@ cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 * alluxio-exporter 启动时需要exporter.yml配置文件，其中需要alluxio组件类型和host地址，可参考 `ava-alluxio/tools/golang/qiniu.com/app/alluxio-exporter/exporter.yml`
 
 * alluxio 容器命名应为 alluxio-master-<group_name> 或 alluxio-worker-<group_name>
+
+### 多分组情况下部署 alluxio-exporter
+以pod的方式启动，不需要指定节点。需要：
+1. 维护分组信息文件 `alluxio-exporter.yml`。将其创建为一个`configmap`，并且将该configmap挂载到pod上。
+
+```shell
+kubectl create configmap <alluxio-exporter-config> --from-file=<alluxio-exporter.yml分组信息文件所在的地址> #创建configmap
+```
+2. 启动pod
+
+```shell
+kubectl create -f <deployment.yml>
+```
 
 ### 部署 jvm-exporter
 
@@ -298,6 +313,10 @@ cd /alluxio-share/workspace/repos/ava-alluxio/deploy/monitor
 1. 对于不在k8s集群中的机器，需要使用`Endpoints + Service`来表示`metric`获取源。另外, `ServiceMoniter`中的`endpoints label`需要与`endpoints.yml`中的`ports label`一一对应
 
 2. `ServiceMonitor` 可以选多个 `Service`，通过一个共同的 `label` 就可以了，实际抓取的是 `Service` 后面对应的 `Endpoints`
+
+### 多分组情况下配置 ava-prometheus
+对于alluxio exporter, 相对于以上的`Endpoints + Service +ServiceMonitor`配置方式，不同之处在于：把配置方式改变为：`Deployment + Service + ServiceMonitor`。在alluxio exporter中采集各个分组的metric，并且以pod的形式启动。所需的Deployment + Service + ServiceMonitor配置文件均放在deploy/monitor路径下。
+
 
 ### 部署 grafana
 

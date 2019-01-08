@@ -44,7 +44,7 @@ type MasterCollector struct {
 	UFSCapacityUsed prometheus.Gauge
 }
 
-func NewMasterCollector(host string, group string ) *MasterCollector {
+func NewMasterCollector(host string, group string) *MasterCollector {
 	labels := make(prometheus.Labels)
 	labels["group"] = group
 

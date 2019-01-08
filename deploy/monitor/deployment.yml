@@ -1,4 +1,4 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1 
 kind: Deployment
 metadata:
   name: alluxio-monitor-group
@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: alluxio-monitor-group
-  replicas: 1 # tells deployment to run 2 pods matching the template
+  replicas: 1 
   template:
     metadata:
       labels:
@@ -19,11 +19,17 @@ spec:
       containers:
       - name: alluxio-exporter
         imagePullPolicy: Always
-        image: reg-xs.qiniu.io/atlab/alluxio-exporter:group-v1.2
+        image: reg-xs.qiniu.io/atlab/alluxio-exporter:group-v1.11
         volumeMounts:
         - name: config-volume
           mountPath: /conf
+        - name: my-pvc  
+          mountPath: /my-pvc   
       volumes:
       - name: config-volume
         configMap:
           name: alluxio-exporter-config
+      - name: my-pvc
+        persistentVolumeClaim:
+          claimName: alluxio-exporter
+      
