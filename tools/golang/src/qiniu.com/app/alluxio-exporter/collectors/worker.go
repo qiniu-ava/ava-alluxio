@@ -12,6 +12,10 @@ import (
 type WorkerCollector struct {
 	instance string
 
+	host string
+
+	role string
+
 	TotalCapacity prometheus.Gauge
 
 	TotalCapacityUsed prometheus.Gauge
@@ -27,15 +31,19 @@ type WorkerCollector struct {
 	SSDCapacityUsed prometheus.Gauge
 
 	WorkerMetrics *prometheus.GaugeVec
+
+	Roles *prometheus.GaugeVec
 }
 
-func NewWorkerCollector(workerAddress string, group string) *WorkerCollector {
+func NewWorkerCollector(workerAddress string, group string, role string, host string) *WorkerCollector {
 	labels := make(prometheus.Labels)
 	labels["instance"] = workerAddress
 	labels["group"] = group
 
 	return &WorkerCollector{
 		instance: workerAddress,
+		role:     role,
+		host:     host,
 		TotalCapacity: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace:   typo.AlluxioNamespace,
 			Name:        "worker_capacity_bytes_all",
@@ -87,6 +95,15 @@ func NewWorkerCollector(workerAddress string, group string) *WorkerCollector {
 			},
 			[]string{"metric"},
 		),
+		Roles: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace:   typo.AlluxioNamespace,
+				Name:        "worker_roles",
+				Help:        "Roles of the worker",
+				ConstLabels: labels,
+			},
+			[]string{"host", "role"},
+		),
 	}
 }
 
@@ -105,6 +122,7 @@ func (w *WorkerCollector) metricsList() []prometheus.Metric {
 func (w *WorkerCollector) collectorList() []prometheus.Collector {
 	return []prometheus.Collector{
 		w.WorkerMetrics,
+		w.Roles,
 	}
 }
 
@@ -117,7 +135,6 @@ func (w *WorkerCollector) collect() error {
 
 	res, e := HTTPRequest(URLStr, method, nil, nil)
 	if e != nil {
-		log.Println("[INFO] URLStr is : ",URLStr)
 		log.Println("[ERROR] HTTPRequest for worker:"+w.instance+" failed: ", e)
 		return e
 	}
@@ -141,8 +158,12 @@ func (w *WorkerCollector) collect() error {
 		tmpName := strings.Split(k, ".")[2]
 		w.WorkerMetrics.WithLabelValues(tmpName).Set(v.(float64))
 	}
-
+	w.describeRoles()
 	return nil
+}
+
+func (w *WorkerCollector) describeRoles() {
+	w.Roles.WithLabelValues(w.host, w.role)
 }
 
 func (w *WorkerCollector) Describe(ch chan<- *prometheus.Desc) {
