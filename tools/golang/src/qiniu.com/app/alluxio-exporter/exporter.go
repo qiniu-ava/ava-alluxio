@@ -21,7 +21,6 @@ type AlluxioExporter struct {
 var _ prometheus.Collector = &AlluxioExporter{}
 
 func NewAlluxioExporter() *AlluxioExporter {
-
 	return &AlluxioExporter{}
 }
 
@@ -49,12 +48,12 @@ func main() {
 	flag.Parse()
 	log.Printf("parse the file ", *exporterConfig)
 	exporter := NewAlluxioExporter()
-
 	if fileExists(*exporterConfig) {
 		cfg, err := ParseConfig(*exporterConfig)
 		if err != nil {
 			log.Fatalf("Error: %v", err)
 		}
+
 		for _, alluxio := range cfg.Alluxio {
 			group := alluxio.Group
 			log.Printf("Group name is :", group)
