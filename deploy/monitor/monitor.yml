@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: alluxio-monitor-servicemonitor-group
+  namespace: ava
+  labels:
+    k8s-app: alluxio-monitor-servicemonitor-group
+    app: prometheus
+    prometheus: ava-prometheus
+spec:
+  jobLabel: k8s-app
+  endpoints:
+    - port: alluxio-export
+      interval: 15s
+      path: /metrics
+  selector:
+    matchLabels:
+      k8s-app: alluxio-monitor-group
+  namespaceSelector:
+    matchNames:
+    - ava
+

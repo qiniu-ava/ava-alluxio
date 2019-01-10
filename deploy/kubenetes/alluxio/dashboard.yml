@@ -16,6 +16,21 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  name: alluxio-master-group-ava-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-dashboard-group-ava.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-dashboard
+          servicePort: 8080
+        path: /
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
   name: alluxio-master-alg-pro-dashboard
   namespace: ava
 spec:
@@ -121,6 +136,21 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  name: alluxio-master-face-dashboard
+  namespace: ava
+spec:
+  rules:
+  - host: "alluxio-dashboard-face.ava-prd.kegate-jq.cloudappl.com"
+    http:
+      paths:
+      - backend:
+          serviceName: alluxio-dashboard
+          servicePort: 8080
+        path: /
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
   name: alluxio-proxy
   namespace: ava
 spec:
@@ -186,7 +216,7 @@ spec:
         - name: atlab-images
       containers:
       - name: nginx
-        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.25
+        image: reg-xs.qiniu.io/atlab/alluxio-nginx:ava-alluxio-0.1.29
         ports:
         - containerPort: 8080
         resources:

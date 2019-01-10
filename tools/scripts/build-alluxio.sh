@@ -110,9 +110,9 @@ cd .tmp/alluxio/alluxio-${ALLUXIO_VERSION}
 cp ../../../deploy/env/alluxio-flex-volume.sh ./ && cp ../../../deploy/env/client/alluxio-* ./conf
 cd ../
 if git describe --exact-match --tags $(git rev-parse --short=7 HEAD); then
-  tag=`git describe --exact-match --tags $(git rev-parse --short=7 HEAD)` && tar zcvf ${tag}.tar.gz ./alluxio-${ALLUXIO_VERSION}
+  tag=`git describe --exact-match --tags $(git rev-parse --short=7 HEAD)` && echo "$tag" > ./alluxio-${ALLUXIO_VERSION}/version && tar zcvf ${tag}.tar.gz ./alluxio-${ALLUXIO_VERSION}
 else
-  tag=`git rev-parse --short=7 HEAD` && tar zcvf ava-alluxio-${tag}.tar.gz ./alluxio-${ALLUXIO_VERSION}
+  tag=`git rev-parse --short=7 HEAD` && echo "ava-alluxio-$tag" > ./alluxio-${ALLUXIO_VERSION}/version && tar zcvf ava-alluxio-${tag}.tar.gz ./alluxio-${ALLUXIO_VERSION}
 fi
 cd $DIR/../..
 

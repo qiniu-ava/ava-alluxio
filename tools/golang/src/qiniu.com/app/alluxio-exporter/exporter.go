@@ -5,12 +5,12 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"sync"
-
-	"qiniu.com/app/alluxio-exporter/collectors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"qiniu.com/app/alluxio-exporter/collectors"
 )
 
 type AlluxioExporter struct {
@@ -41,12 +41,12 @@ func (a *AlluxioExporter) Collect(ch chan<- prometheus.Metric) {
 
 func main() {
 	var (
-		addr           = flag.String("telemetry.addr", ":9999", "host:port for alluxio exporter")
+		addr           = flag.String("telemetry.addr", ":9996", "host:port for alluxio exporter")
 		metricsPath    = flag.String("telemetry.path", "/metrics", "URL path for surfacing collected metrics")
-		exporterConfig = flag.String("exporter.config", "/exporter.yml", "Path to alluxio exporter config.")
+		exporterConfig = flag.String("exporter.config", "/conf/alluxio-exporter.yml", "Path to alluxio exporter config.")
 	)
 	flag.Parse()
-
+	log.Printf("parse the file ", *exporterConfig)
 	exporter := NewAlluxioExporter()
 	if fileExists(*exporterConfig) {
 		cfg, err := ParseConfig(*exporterConfig)
@@ -55,20 +55,25 @@ func main() {
 		}
 
 		for _, alluxio := range cfg.Alluxio {
-			switch alluxio.AlluxioType {
-			case "worker", "worker-writer":
+			group := alluxio.Group
+			log.Printf("Group name is :", group)
+			exporter.collectors = append(exporter.collectors,
+				collectors.NewMasterCollector(alluxio.MasterHost, group))
+			workerList, err := GetWorkerInfoList(alluxio.MasterHost)
+			if err != nil {
+				log.Fatalf("Get worker info Error: %v", err)
+			}
+			for _, worker := range workerList {
+				instance := worker.Address.Host + ":" + strconv.Itoa(worker.Address.WebPort)
+				role := worker.Address.Role
+				log.Printf("[INFO]Worker instance : ", instance)
 				exporter.collectors = append(exporter.collectors,
-					collectors.NewWorkerCollector(alluxio.AlluxioWebHost))
-			default:
-				exporter.collectors = append(exporter.collectors,
-					collectors.NewMasterCollector(alluxio.AlluxioWebHost))
+					collectors.NewWorkerCollector(instance, group, role, worker.Address.Host))
 			}
 		}
 	} else {
-		exporter.collectors = append(exporter.collectors,
-			collectors.NewWorkerCollector("127.0.0.1:30000"))
-		exporter.collectors = append(exporter.collectors,
-			collectors.NewMasterCollector("127.0.0.1:19999"))
+		log.Printf("file do not exist !")
+		return
 	}
 	prometheus.MustRegister(exporter)
 	http.Handle(*metricsPath, promhttp.Handler())

@@ -1,0 +1,35 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: alluxio-monitor-group
+  namespace: ava
+spec:
+  selector:
+    matchLabels:
+      app: alluxio-monitor-group
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: alluxio-monitor-group
+    spec:
+      hostNetwork: true
+      imagePullSecrets:
+        - name: atlab-images
+      containers:
+      - name: alluxio-exporter
+        imagePullPolicy: Always
+        image: reg-xs.qiniu.io/atlab/alluxio-exporter:group-v1.11
+        volumeMounts:
+        - name: config-volume
+          mountPath: /conf
+        - name: pvc-volume  
+          mountPath: /alluxio-monitor-pvc   
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alluxio-exporter-config
+      - name: pvc-volume
+        persistentVolumeClaim:
+          claimName: alluxio-exporter
+      
