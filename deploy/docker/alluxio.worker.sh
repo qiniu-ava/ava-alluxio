@@ -28,13 +28,10 @@ start() {
     mkdir -p /mnt/ramdisk/data
   fi
 
-  mkdir -p /disk1/alluxio/data/cachedisk
-  mkdir -p /disk2/alluxio/data/cachedisk
-  mkdir -p /disk3/alluxio/data/cachedisk
-  mkdir -p /disk4/alluxio/data/cachedisk
-  mkdir -p /disk5/alluxio/data/cachedisk
-  mkdir -p /disk6/alluxio/data/cachedisk
-  mkdir -p /disk2/alluxio/data/underStorage
+  mkdir -p /disk9/alluxio/data/cachedisk
+  mkdir -p /disk10/alluxio/data/cachedisk
+  mkdir -p /disk11/alluxio/data/cachedisk
+  mkdir -p /disk12/alluxio/data/cachedisk
 
   source /alluxio-share/alluxio/env/worker
 
@@ -57,7 +54,7 @@ start() {
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_HIGH_RATIO=0.7 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL0_WATERMARK_LOW_RATIO=0.5 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_ALIAS=SSD \
-    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk1,/opt/cachedisk2,/opt/cachedisk3,/opt/cachedisk4,/opt/cachedisk5,/opt/cachedisk6 \
+    -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_PATH=/opt/cachedisk1,/opt/cachedisk2,/opt/cachedisk3,/opt/cachedisk4 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_DIRS_QUOTA=300GB,400GB,1800GB,1800GB,1800GB,1800GB \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_HIGH_RATIO=0.8 \
     -e ALLUXIO_WORKER_TIEREDSTORE_LEVEL1_WATERMARK_LOW_RATIO=0.7 \
@@ -73,12 +70,10 @@ start() {
     -e ALLUXIO_ZOOKEEPER_LEADER_PATH=/leader/alluxio-ro \
     -e ALLUXIO_ZOOKEEPER_ELECTION_PATH=/election/alluxio-ro \
     -v /mnt/ramdisk:/opt/ramdisk \
-    -v /disk1/alluxio/data/cachedisk:/opt/cachedisk1 \
-    -v /disk2/alluxio/data/cachedisk:/opt/cachedisk2 \
-    -v /disk3/alluxio/data/cachedisk:/opt/cachedisk3 \
-    -v /disk4/alluxio/data/cachedisk:/opt/cachedisk4 \
-    -v /disk5/alluxio/data/cachedisk:/opt/cachedisk5 \
-    -v /disk6/alluxio/data/cachedisk:/opt/cachedisk6 \
+    -v /disk9/alluxio/data/cachedisk:/opt/cachedisk1 \
+    -v /disk10/alluxio/data/cachedisk:/opt/cachedisk2 \
+    -v /disk11/alluxio/data/cachedisk:/opt/cachedisk3 \
+    -v /disk12/alluxio/data/cachedisk:/opt/cachedisk4 \
     -v /alluxio-share/alluxio/underStorage:/underStorage \
     --restart=always \
     alluxio \
