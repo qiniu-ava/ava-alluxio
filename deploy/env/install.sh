@@ -13,15 +13,6 @@ apt-get update
 apt-get install -y git ca-certificates curl
 
 # ===============================================================
-# install ansible
-# ---------------------------------------------------------------
-
-sudo apt-get install -y software-properties-common
-sudo apt-add-repository ppa:ansible/ansible
-sudo apt update
-sudo apt-get install -y ansible
-
-# ===============================================================
 # install docker
 # ---------------------------------------------------------------
 
