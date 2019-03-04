@@ -6,7 +6,7 @@ CONFIGURE_LOCK="/opt/alluxio/configure.lock"
 CUR_DIR=$(cd "$( dirname "$( readlink "$0" || echo "$0" )" )"; pwd)
 USAGE="${CUR_DIR}/alluxio-flex-volume.sh <command> <options>
   command:
-    mount [--mode=<read_write_mode>] --group=<group_name> --uid=<uid> --ak=<access_key> --sk=<secret_key> --bucket=<bucket_name> --domain=<bucket_domain> --local_path=<local_path>
+    mount [--mode=<read_write_mode>] --group=<group_name> --uid=<uid> --ak=<access_key> --sk=<secret_key> --bucket=<bucket_name> [--prefix=<key_prefix>] --domain=<bucket_domain> --local_path=<local_path>
     umount <local_path>
 "
 
@@ -64,6 +64,7 @@ flex_volume_mount() {
   local ak
   local sk
   local bucket
+  local prefix
   local domain
   local mode
   local local_path
@@ -86,6 +87,9 @@ flex_volume_mount() {
       --bucket=*)
         bucket="${i#*=}"
       ;;
+    --prefix=*)
+      prefix="${i#*=}"
+      ;;
       --domain=*)
         domain="${i#*=}"
       ;;
@@ -97,6 +101,7 @@ flex_volume_mount() {
       ;;
       *)
         echo "[WARNING] unknow argument ${i}"
+      ;;
     esac
   done
 
@@ -127,6 +132,11 @@ flex_volume_mount() {
   fi
   release_configure
 
+  fullpath="$bucket"
+  if [[ ! -z $prefix ]]; then
+    fullpath="$fullpath/$prefix"
+  fi
+
   # mount bucket in alluxio
   acquire_configure "$group"
   "${CUR_DIR}"/bin/alluxio fs mount \
@@ -134,13 +144,13 @@ flex_volume_mount() {
     --option fs.oss.accessKeySecret="${sk}" \
     --option fs.oss.endpoint="${domain}" \
     --option fs.oss.userId="${uid}" \
-    "$alluxio_uid_path/$bucket" \
-    "oss://$bucket"
+    "$alluxio_uid_path/$fullpath" \
+    "kodo://$fullpath"
   release_configure
 
   # mount alluxio path to local path
   acquire_configure "$group"
-  "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uid_path/$bucket" -o "$mode"
+  "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uid_path/$fullpath" -o "$mode"
   release_configure
 }
 
