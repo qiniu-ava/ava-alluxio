@@ -1,5 +1,12 @@
 #!/bin/bash
 
+BYellow='\033[1;33m'
+BRed='\033[1;31m'
+NC="\033[0m"
+
+echo -e "${BRed}[ERROR]${NC} this script is ${BRed}Depricated${NC}, please try to deploy zookeeper by yourself"
+exit 1
+
 set -ex
 
 source /root/env

@@ -11,7 +11,7 @@
 ######## export ALLUXIO_IP_EXCLUDE=192.168.212              ########
 ####################################################################
 
-if [ "${ALLUXIO_ENV}" == "" ]; then
+if [ "${ALLUXIO_ENV}" = "" ]; then
   ALLUXIO_ENV=/disk-cephfs/alluxio/env
 fi
 

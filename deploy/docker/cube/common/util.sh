@@ -113,7 +113,16 @@ getSSDAvailableQuota() {
     return 1
   fi
 
-  origin_size=$(df -h $1 | grep "$1" | awk '{print $2}')
+  if isMacOS; then
+    if df -h $1 | grep "$1" > /dev/null; then
+      origin_size=$(df -h $1 | grep "$1" | awk '{print $2}')
+    else
+      origin_size=$(df -h $1 | grep "/dev/" | head -n 1 | awk '{print $2}')
+    fi
+  else
+    origin_size=$(df -h $1 | grep "$1" | awk '{print $2}')
+  fi
+
   {
     if ! which bc; then
       apt update
@@ -130,6 +139,13 @@ getSSDAvailableQuota() {
   echo $(echo "${origin_size}*0.8/${MAX_READ_WORKER_PER_NODE}" | bc | awk -F'.' '{print $1}')
 }
 
+# for macos
+# input:
+#   video
+#   /data/alluxio-volume
+# output
+#   -v /data/alluxio-volume/data-video/cachedisk:/opt/cachedisk
+# for linux
 # input:
 #   video
 #   /disk1
@@ -146,13 +162,29 @@ gen_volume_str_from_ssd_list() {
   group=$1
   shift
   ss=""
-  for disk in $@; do
-    num=$(echo ${disk} | grep -oE "[0-9]+")
-    ss="${ss} -v /disk${num}/alluxio/data-${group}/cachedisk:/opt/cachedisk${num} "
-  done
+  if isMacOS; then
+    counter=0
+    for path in $@; do
+      counter=$((counter+1))
+      ss="${ss} -v ${path}/alluxio/data-${group}/cachedisk:/opt/cachedisk${counter} "
+    done
+  else
+    for disk in $@; do
+      num=$(echo ${disk} | grep -oE "[0-9]+")
+      ss="${ss} -v /disk${num}/alluxio/data-${group}/cachedisk:/opt/cachedisk${num} "
+    done
+  fi
   echo "${ss}"
 }
 
+# for mac
+# input:
+#   <path1>
+#   [path2]
+#   [path3]
+# output:
+#   /opt/cachedisk1[,/opt/cachedisk2,/opt/cachedisk3]
+# for linux
 # input:
 #   /disk1
 #   /disk2
@@ -165,7 +197,12 @@ gen_path_str_from_ssd_list() {
     exit 1
   fi
 
-  echo $(join , $(echo $@ | sed 's/disk/opt\/cachedisk/g'))
+  ss=""
+  for i in $(eval echo {1.."$#"}); do
+    ss="$ss/opt/cachedisk$i "
+  done
+
+  echo $(join , $ss)
 }
 
 # input:
