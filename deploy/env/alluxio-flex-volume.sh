@@ -9,7 +9,7 @@ ERROR_UNKNOW_MOUNT_ERROR=1100
 ERROR_FAILED_CREATE_PREFIX=1101
 ERROR_BAD_UFS_TYPE=1102
 
-log_dir=/var/log/alluxio
+ALLUXIO_LOGS_DIR=/var/log/alluxio
 
 if [ -z "$ENDPOINT" ]; then
   ENDPOINT="iovip.qbox.me"
@@ -45,13 +45,13 @@ END
 
 get_cluster_name() {
   cluster_short_cut=$(hostname | sed 's/gpu//g' | sed 's/[0-9]\+//g')
-  cluster_name=$(echo $cluster_map | jq --arg sc $cluster_short_cut '.$sc')
+  cluster_name=$(echo $cluster_map | jq --arg sc $cluster_short_cut '.$[sc].name')
 
   if [ "$cluster_name" = "" ]; then
     cluster_name=jq
   fi
 
-  echo $cluster_name
+  echo $cluster_name | sed 's/"//g'
 }
 
 print_usage() {
@@ -76,8 +76,8 @@ is_macos() {
 # now we only consider ubuntu distribution
 get_my_ip() {
   cluster=$(get_cluster_name)
-  ip_prefix=$(echo "$cluster_map" | jq --arg cluster $cluster '.$cluster.ip_prefix')
-  ip_exclude=$(echo "$cluster_map" | jq --arg cluster $cluster '.$cluster.ip_exclude')
+  ip_prefix=$(echo "$cluster_map" | jq --arg cluster $cluster '.[$cluster].ip_prefix' | sed 's/"//g')
+  ip_exclude=$(echo "$cluster_map" | jq --arg cluster $cluster '.[$cluster].ip_exclude' | sed 's/"//g')
 
   if is_linux; then
     if [ "$ip_exclude" ]; then
@@ -112,9 +112,9 @@ setup_log_dir() {
         ;;
     esac
   done
-  log_dir="/var/log/alluxio/${ufs_type}-${bucket}-$(date +%s)"
+  ALLUXIO_LOGS_DIR="/var/log/alluxio/${ufs_type}-${bucket}-$(date +%s)"
 
-  mkdir -p $log_dir
+  mkdir -p ${ALLUXIO_LOGS_DIR}
 }
 
 acquire_configure() {
@@ -124,7 +124,6 @@ acquire_configure() {
 
   cp "$CUR_DIR/conf/alluxio-env-$1.sh" "$CUR_DIR/conf/alluxio-env.sh"
   cp "$CUR_DIR/conf/alluxio-site-$1.properties" "$CUR_DIR/conf/alluxio-site.properties"
-  echo "alluxio.logs.dir=${log_dir}" >> $CUR_DIR/conf/alluxio-site.properties
   echo "alluxio.locality.node=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
   echo "alluxio.user.hostname=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
 
@@ -286,6 +285,7 @@ case "$1" in
   mount)
     shift
     setup_log_dir "$@"
+    export ALLUXIO_LOGS_DIR
     flex_volume_mount "$@"
   ;;
   umount)
