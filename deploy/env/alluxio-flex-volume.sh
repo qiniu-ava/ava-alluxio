@@ -9,6 +9,8 @@ ERROR_UNKNOW_MOUNT_ERROR=1100
 ERROR_FAILED_CREATE_PREFIX=1101
 ERROR_BAD_UFS_TYPE=1102
 
+log_dir=/var/log/alluxio
+
 if [ -z "$ENDPOINT" ]; then
   ENDPOINT="iovip.qbox.me"
 fi
@@ -96,6 +98,25 @@ get_my_ip() {
   fi
 }
 
+setup_log_dir() {
+  local bucket
+  local ufs_type
+
+  for i in "$@"; do
+    case $i in
+      --bucket=*)
+        bucket="${i#*=}"
+      ;;
+      --ufs_type=*)
+        ufs_type="${i#*=}"
+        ;;
+    esac
+  done
+  log_dir="/var/log/alluxio/${ufs_type}-${bucket}-$(date +%s)"
+
+  mkdir -p $log_dir
+}
+
 acquire_configure() {
   while [ -f "${CONFIGURE_LOCK}" ]; do
     sleep 1
@@ -103,6 +124,7 @@ acquire_configure() {
 
   cp "$CUR_DIR/conf/alluxio-env-$1.sh" "$CUR_DIR/conf/alluxio-env.sh"
   cp "$CUR_DIR/conf/alluxio-site-$1.properties" "$CUR_DIR/conf/alluxio-site.properties"
+  echo "alluxio.logs.dir=${log_dir}" >> $CUR_DIR/conf/alluxio-site.properties
   echo "alluxio.locality.node=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
   echo "alluxio.user.hostname=$(get_my_ip)" >> $CUR_DIR/conf/alluxio-site.properties
 
@@ -263,6 +285,7 @@ fi
 case "$1" in
   mount)
     shift
+    setup_log_dir "$@"
     flex_volume_mount "$@"
   ;;
   umount)
