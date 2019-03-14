@@ -45,7 +45,7 @@ END
 
 get_cluster_name() {
   cluster_short_cut=$(hostname | sed 's/gpu//g' | sed 's/[0-9]\+//g')
-  cluster_name=$(echo $cluster_map | jq --arg sc $cluster_short_cut '.$[sc].name')
+  cluster_name=$(echo $cluster_map | jq --arg sc $cluster_short_cut '.[$sc].name')
 
   if [ "$cluster_name" = "" ]; then
     cluster_name=jq
@@ -257,9 +257,9 @@ flex_volume_mount() {
   # mount alluxio path to local path
   acquire_configure "$group"
   if [ -n "$prefix" ]; then
-    "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uri_prefix/$bucket" -o "$mode"
-  else
     "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uri_prefix/$bucket/$prefix" -o "$mode"
+  else
+    "${CUR_DIR}"/integration/fuse/bin/alluxio-fuse mount "$local_path" "$alluxio_uri_prefix/$bucket" -o "$mode"
   fi
   release_configure
 }
