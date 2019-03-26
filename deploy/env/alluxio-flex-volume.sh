@@ -186,10 +186,10 @@ flex_volume_mount() {
   done
 
   cluster=$(get_cluster_name)
-  if [[ -f "$CUR_DIR/conf/alluxio-env-$group.sh" && -f "$CUR_DIR/conf/alluxio-site-$group.properties" ]]; then
-    group="$group"
-  elif [ "$cluster" != "jq" ]; then
+  if [ "$cluster" != "jq" ]; then
     group="$cluster-default"
+  elif [[ -f "$CUR_DIR/conf/alluxio-env-$group.sh" && -f "$CUR_DIR/conf/alluxio-site-$group.properties" ]]; then
+    group="$group"
   else
     group=default
   fi
